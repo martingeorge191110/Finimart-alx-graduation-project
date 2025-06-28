@@ -14,6 +14,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  Controller // Has all privileges
+  Sub_Controller // Has all privileges except (conformation and payment of order)
+  Order_Maker // only create orders
+}
+
 model Admin {
   id             String  @id @default(uuid())
   first_name     String
@@ -46,4 +52,111 @@ model Admin_Refresh_Token {
 
   @@index([admin_id])
   @@index([token])
+}
+
+model User {
+  id            String  @id @default(uuid())
+  first_name    String
+  last_name     String
+  email         String  @unique
+  password_hash String
+  phone_number  String  @unique
+  is_super_user Boolean @default(false)
+  is_blocked    Boolean @default(false)
+
+  Reset_Password Reset_Password? @relation("ResetPasswordUser")
+
+  Company_Super_User  Company? @relation("CompanySuperUser")
+  user_role           UserRole
+  company_id          String?
+  Company_Member_User Company? @relation("CompanyUserMember", fields: [company_id], references: [id])
+
+  RefreshToken RefreshToken[] @relation("RefreshTokenUser")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Reset_Password {
+  id String @id @default(uuid())
+
+  otp_code_hash       String?
+  otp_code_expires_at DateTime?
+  is_verified         Boolean   @default(false)
+
+  user_id String @unique
+  User    User   @relation("ResetPasswordUser", fields: [user_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model RefreshToken {
+  id    String @id @default(uuid())
+  token String // encrypted
+
+  expires_at DateTime
+  revoked    Boolean  @default(false)
+
+  user_id String
+  user    User   @relation("RefreshTokenUser", fields: [user_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([token])
+}
+
+model Company {
+  id           String  @id @default(uuid())
+  name         String  @unique
+  origin       String
+  auth_letter  String
+  website_url  String?
+  phone_number String  @unique
+  fax_number   String?
+  address      String
+  city         String
+  country      String
+  verified     Boolean @default(false)
+  blocked      Boolean @default(false)
+
+  total_amount_purchased Float     @default(0)
+  E_Wallet               E_Wallet? @relation("CompanyWallet")
+
+  super_user_id String? @unique
+  Super_User    User?   @relation("CompanySuperUser", fields: [super_user_id], references: [id])
+  Users         User[]  @relation("CompanyUserMember")
+  Addresses Company_Address[] @relation("CompanyAddress")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Company_Address {
+  id              String  @id @default(uuid())
+  street_address  String
+  building_no     String?
+  city            String
+  state_or_origin String?
+  country         String
+  notes           String?
+
+  company_id String
+  Company    Company @relation("CompanyAddress", fields: [company_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model E_Wallet {
+  id      String @id @default(uuid())
+  balance Float  @default(0)
+
+  company_id String   @unique
+  Company    Company? @relation("CompanyWallet", fields: [company_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
