@@ -13,3 +13,37 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Admin {
+  id             String  @id @default(uuid())
+  first_name     String
+  last_name      String
+  email          String  @unique
+  password       String
+  wrong_attempts Int     @default(0)
+  is_manager     Boolean @default(false)
+
+  created_at    DateTime              @default(now())
+  updated_at    DateTime              @updatedAt
+  Refresh_Token Admin_Refresh_Token[] @relation("AdminRefreshTokens")
+
+  @@index([id])
+  @@index([email])
+}
+
+model Admin_Refresh_Token {
+  id    String @id @default(uuid())
+  token String // encrypted
+
+  expires_at DateTime
+  revoked    Boolean  @default(false)
+
+  admin_id String
+  Admin    Admin  @relation("AdminRefreshTokens", fields: [admin_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([admin_id])
+  @@index([token])
+}
