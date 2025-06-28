@@ -20,6 +20,12 @@ enum UserRole {
   Order_Maker // only create orders
 }
 
+enum PriceRange {
+  Economic // products category
+  Medium
+  Expensive
+}
+
 model Admin {
   id             String  @id @default(uuid())
   first_name     String
@@ -159,4 +165,121 @@ model E_Wallet {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model Brand {
+  id      String @id @default(uuid())
+  name    String
+  img_url String
+
+  Product Product[] @relation("ProductBrand")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Category {
+  id            String @id @default(uuid())
+  category_name String
+  website_name  String
+  lvl           Int    @default(0)
+
+  parent_id String?
+  Parent    Category?  @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: Cascade)
+  Children  Category[] @relation("CategoryHierarchy")
+
+  Product_Categories Product_Categories[] @relation("CategoryToProductIDs")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Product {
+  id            String     @id @default(uuid())
+  product_title String
+  description   String     @db.VarChar(1024)
+  url_img       String
+  product_code  String     @unique
+  color         String?
+  quantity      Int        @default(0)
+  price_range   PriceRange
+  is_active     Boolean    @default(false)
+
+  brand_id String
+  Brand    Brand  @relation("ProductBrand", fields: [brand_id], references: [id], onDelete: SetDefault)
+
+  Product_Categories Product_Categories[] @relation("ProductToCategoryIDs")
+
+  Product_Specs Product_Specs[] @relation("ProductSpecsIDs") // will be added to product not in creating product
+
+  Product_Variant Product_Variant[] @relation("ProductVariant") // will be added to product not in creating product
+
+  created_at            DateTime               @default(now())
+  updated_at            DateTime               @updatedAt
+  Best_Selling_Products Best_Selling_Products? @relation("BestSellingProduct")
+
+  @@index([id])
+  @@index([product_code])
+}
+
+model Best_Selling_Products {
+  id String @id @default(uuid())
+
+  product_id String  @unique
+  Product    Product @relation("BestSellingProduct", fields: [product_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Product_Variant {
+  id       String @id @default(uuid())
+  size     String
+  price    Float  @default(0.0)
+  quantity Int
+
+  product_id String
+  Product    Product @relation("ProductVariant", fields: [product_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Product_Categories {
+  id String @id @default(uuid())
+
+  product_id String
+  Product    Product @relation("ProductToCategoryIDs", fields: [product_id], references: [id], onDelete: Cascade)
+
+  category_id String
+  Category    Category @relation("CategoryToProductIDs", fields: [category_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_id, category_id])
+}
+
+model Specs_Defination {
+  id       String @id @default(uuid())
+  key_name String // (e.g. “Weight”, “Color”)
+  unit     String // (e.g. “kg”, “cm”)
+
+  Product_Specs Product_Specs[] @relation("SpecsProductIDs")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Product_Specs {
+  id    String @id @default(uuid())
+  value String
+
+  product_id String
+  Product    Product @relation("ProductSpecsIDs", fields: [product_id], references: [id], onDelete: Cascade)
+
+  specs_id         String
+  Specs_Defination Specs_Defination @relation("SpecsProductIDs", fields: [specs_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([specs_id, product_id])
 }
