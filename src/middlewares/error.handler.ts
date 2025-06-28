@@ -58,6 +58,34 @@ class ApiError extends Error {
    }
 
    /**
+    * Creates a validation error with a given message and array of validation errors
+    * @param message - The error message
+    * @param arr - An array of validation errors
+    * @returns {ApiError} - An instance of ApiError with the given message and array of validation errors
+    */
+   public static create_validation_err = (message: string, arr: ValidationError[], status_code: number = 400): ApiError => {
+      return (new ApiError(message, arr, status_code || 400))
+   }
+
+   /**
+    * Middleware function for handling validation errors
+    * @param req - The request object
+    * @param res - The response object
+    * @param next - The next middleware function
+    */
+   public static validation_error = (req: Request, res: Response, next: NextFunction): void => {
+      const validation = validationResult(req);
+
+      if (!validation.isEmpty()) {
+         // if (req.file) fs.unlink(req.file.path, () => {});
+         const apiError = this.create_validation_err("validation error!", validation.array(), (req as any).status_code || 400);
+         return (next(apiError));
+      }
+
+      return (next());
+   }
+
+   /**
     * Middleware function for handling errors in the Express application
     * @param error - The error object
     * @param req - The request object
