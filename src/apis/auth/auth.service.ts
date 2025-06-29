@@ -1,5 +1,5 @@
 #!/usr/bin/env ts-node
-import { Company, RefreshToken, Reset_Password, User } from "../../../generated/prisma";
+import { Company, RefreshToken, User } from "../../../generated/prisma";
 import { MainDB, ReplicaDB } from "../../config/db.config";
 import bcrypt from "bcrypt";
 import redis from "../../config/redis.config";
@@ -53,6 +53,90 @@ class AuthServiceClass {
          })
 
          return (refresh_token);
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+      /**
+    * @description This function is used to create a company
+    * @param companyData - The data of the company
+    * @param auth_letter_public_id - The public id of the auth letter
+    * @param super_user_id - The id of the super user
+    * @returns The company
+    */
+      public createCompany = async (companyData: any, auth_letter_public_id: string, super_user_id: string): Promise<void> => {
+         try {
+            await this.mainDB.company.create({
+               data: {
+                  name: companyData.company_name,
+                  origin: companyData.origin,
+                  auth_letter: auth_letter_public_id,
+                  website_url: companyData.website_url || null,
+                  phone_number: companyData.phone_number_company,
+                  fax_number: companyData.fax_number,
+                  address: companyData.address_company,
+                  city: companyData.city_company,
+                  country: companyData.country_company,
+                  Super_User: {
+                     connect: {
+                        id: super_user_id
+                     }
+                  },
+                  Users: {
+                     connect: {
+                        id: super_user_id
+                     }
+                  },
+                  E_Wallet: {
+                     create: {}
+                  }
+               }
+            })
+         } catch (err) {
+            throw (err);
+         }
+      }
+   
+      /**
+       * @description This function is used to create a user
+       * @param userData - The data of the user
+       * @returns The user
+       */
+      public createUser = async (userData: any): Promise<User> => {
+         try {
+            const hashed_password = await bcrypt.hash(userData.password, 12);
+   
+            const user: User = await this.mainDB.user.create({
+               data: {
+                  first_name: userData.first_name,
+                  last_name: userData.last_name,
+                  email: userData.email,
+                  password_hash: hashed_password,
+                  phone_number: userData.phone_number_user,
+                  user_role: "Controller",
+                  is_super_user: true
+               }
+            })
+   
+            return (user);
+         } catch (err) {
+            throw (err);
+         }
+      }
+
+   /**
+    * @description This function is used to get a company by their phone number
+    * @param phone_number - The phone number of the company
+    * @returns The company
+    */
+   public getCompanyByPhoneNumber = async (phone_number: string): Promise<Company | null> => {
+      try {
+         const company = await this.replicaDB.company.findUnique({
+            where: { phone_number: phone_number }
+         })
+
+         return (company);
       } catch (err) {
          throw (err);
       }

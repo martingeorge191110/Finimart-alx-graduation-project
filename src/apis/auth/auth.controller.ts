@@ -19,7 +19,7 @@ class AuthControllerClass {
     * @description This is the constructor of the AuthController class
     * @param service - it is instance of the AuthServiceClass, it is used to handle auth with the database
     */
-   constructor (service: AuthServiceClass) {
+   constructor(service: AuthServiceClass) {
       this.service = service;
       this.MAX_REFRESH_TOKENS = 3;
    }
@@ -77,6 +77,31 @@ class AuthControllerClass {
    }
 
    /**
+    * @description This function is used to register a user
+    * @param req - The request object
+    * @param res - The response object
+    * @param next - The next function
+    */
+   public Register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { first_name, last_name, email, password, phone_number_user } = req.body;
+      const { company_name, origin, website_url, phone_number_company, fax_number, address_company, city_company, country_company } = req.body;
+      const { auth_letter_public_id } = (req as any);
+
+      try {
+         // creating the user in out records before creating the company
+         const user = await this.service.createUser({ first_name, last_name, email, password, phone_number_user });
+
+         // creating the company in our records
+         await this.service.createCompany({ company_name, origin, website_url, phone_number_company, fax_number, address_company, city_company, country_company }, auth_letter_public_id, user.id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 201, "Register successful"));
+      } catch (err) {
+         console.log(err)
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   /**
     * @description This function is used to logout a user (removing the refresh token from the database)
     * @param req - The request object
     * @param res - The response object
@@ -94,7 +119,7 @@ class AuthControllerClass {
             return (next(ApiError.create_error("Refresh token not found", 404)));
 
          if (refresh_token_record.revoked)
-            return (next(ApiError.create_error ("Refresh token revoked", 401)));
+            return (next(ApiError.create_error("Refresh token revoked", 401)));
 
          await this.service.removeRefreshToken(refresh_token_record.id, payload.user_id);
 
