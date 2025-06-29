@@ -25,6 +25,24 @@ AuthRouter.route("/register/")
       authController.Register
    );
 
+AuthRouter.route("/send-otp-code/")
+   .post(
+      authValidation.sendOtpCodeValidation(), ApiError.validation_error,
+      authController.SendOtpCode
+   );
+
+AuthRouter.route("/verify-otp-code/")
+   .put(
+      authValidation.verifyOtpCodeValidation(), ApiError.validation_error,
+      authController.VerifyOtpCode
+   );
+
+AuthRouter.route("/reset-password/")
+   .put(
+      authValidation.resetPasswordValidation(), ApiError.validation_error,
+      authController.ResetPassword
+   );
+
 AuthRouter.route("/logout/")
    .post(
       authValidation.refreshTokenValidation(), ApiError.validation_error,

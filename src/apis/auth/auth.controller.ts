@@ -102,6 +102,93 @@ class AuthControllerClass {
    }
 
    /**
+ * @description This function is used to send a OTP code to the user
+ * @param req - The request object
+ * @param res - The response object
+ * @param next - The next function
+ */
+   public SendOtpCode = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const user: User = (req as any).user;
+
+      try {
+         const otp_code = auhtUtilies.generate_otp_code();
+
+         const otp_code_record = await this.service.updateUserOtpCode(user.id, otp_code);
+
+         await globalUtils.SendMail(user.email, "استخدم رمز التحقق الآتي لإعادة تعيين كلمة المرور", auhtUtilies.html_code_for_otp_code(otp_code, otp_code_record.otp_code_expires_at as Date))
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "OTP code sent to the user"));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   /**
+ * @description This function is used to verify a OTP code
+ * @param req - The request object
+ * @param res - The response object
+ * @param next - The next function
+ */
+   public VerifyOtpCode = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const user: User = (req as any).user;
+      const { otp_code } = req.body;
+      const current_date = new Date();
+
+      try {
+         const otp_code_record = await this.service.getUserOtpCode(user.id);
+
+         if (!otp_code_record || !otp_code_record.otp_code_hash || !otp_code_record.otp_code_expires_at)
+            return (next(ApiError.create_error("OTP code not found", 404)));
+
+         if (otp_code_record.otp_code_expires_at < current_date)
+            return (next(ApiError.create_error("OTP code expired, Request a new one", 401)));
+
+         const isMatch = await bcrypt.compare(otp_code, otp_code_record.otp_code_hash);
+         if (!isMatch)
+            return (next(ApiError.create_error("Invalid OTP code", 401)));
+
+         const verified_otp_code_record = await this.service.verifyUserOtpCode(user.id, otp_code);
+
+         if (!verified_otp_code_record)
+            return (next(ApiError.create_error("OTP code verification failed", 401)));
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "OTP code verified"));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   /**
+    * @description This function is used to reset the password
+    * @param req - The request object
+    * @param res - The response object
+    * @param next - The next function
+    */
+   public ResetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const user: User = (req as any).user;
+      const { new_password } = req.body;
+
+      try {
+         const otp_code_record = await this.service.getUserOtpCode(user.id);
+
+         if (!otp_code_record || !otp_code_record.otp_code_hash || !otp_code_record.otp_code_expires_at)
+            return (next(ApiError.create_error("OTP code not found", 404)));
+
+         if (!otp_code_record.is_verified)
+            return (next(ApiError.create_error("OTP code not verified", 401)));
+
+
+         await this.service.updateUserPassword(user.id, new_password);
+
+         await this.service.removeUserOtpCode(user.id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Password reset successful"));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   /**
     * @description This function is used to logout a user (removing the refresh token from the database)
     * @param req - The request object
     * @param res - The response object
