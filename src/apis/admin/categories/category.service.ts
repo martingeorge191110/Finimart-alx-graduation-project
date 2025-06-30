@@ -2,6 +2,7 @@ import { promises } from "nodemailer/lib/xoauth2";
 import { Category } from "../../../../generated/prisma";
 import { MainDB, ReplicaDB } from "../../../config/db.config";
 import redis from "../../../config/redis.config";
+import adminUtilies from "../admin.utilies";
 
 
 
@@ -223,6 +224,64 @@ class AdminCategoryService {
          throw (err);
       }
    }
+
+   public existingRelation = async (children_ids: string[], parent_id: string): Promise<boolean> => {
+      try {
+         const isRelation = await this.configReplicaDB.category.findFirst({
+            where: { id: { in: children_ids }, parent_id }
+         })
+
+         if (isRelation) return (true);
+
+         return (false);
+      } catch (err) {
+         throw (err);
+      }
+   };
+
+   public createRelationsByParent = async (children: Category[], parent_id: string) => {
+      try {
+         return (await this.configMainDB.category.update({
+            where: { id: parent_id },
+            data: {
+               Children: {
+                  connect: children.map((child) => ({ id: child.id }))
+               }
+            },
+            include: {
+               Children: {
+                  select: {
+                     id: true, category_name: true, lvl: true, created_at: true
+                  }
+               }
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   };
+
+   public getCategoryHierarchyRedis = async () => {
+      try {
+         return (await this.configRedis.get("categories_hierarchy"));
+      } catch (err) {
+         throw (err);
+      }
+   };
+
+   public getCategoryHierarchyDB = async () => {
+      try {
+         // First get all root categories (categories that are not children of any other category)
+         const rootCategories = await this.configReplicaDB.category.findMany({
+            where: { lvl: 0 },
+            include: { Children: true }
+         });
+
+         return (await adminUtilies.buildCategoryHierarchy(rootCategories));
+      } catch (err) {
+         throw (err);
+      }
+   };
 }
 
 const adminCategoryService = new AdminCategoryService();

@@ -104,6 +104,37 @@ class AdminCategoryValidationClass {
       body("website_name")
          .trim().notEmpty().withMessage("Category website Name is Required!"),
    ])
+
+   public hierarchyVlidation = (): ValidationChain[] => ([
+      body("parent_id")
+         .trim().notEmpty().withMessage("Category is required!")
+         .isLength({ min: 5, max: 55}).withMessage("category id must between 5 and 55 characters")
+         .bail()
+         .custom( async (val: string, { req }: Meta): Promise<boolean | void> => {
+            try {
+               const category = await this.service.getCategoryByID(val);
+
+               if (!category) {
+                  (req as any).status_code = 400;
+                  throw (new Error("Category Not found!"));
+               }
+
+               (req as any).category = category;
+               return (true);
+            } catch (err) {
+               throw (err);
+            }
+         }),
+      body("children_ids")
+         .isArray({max: 5}).withMessage("At most selecting 5 categories as a children to this Parent category")
+         .custom((val: string[], { req }: Meta) => {
+            for (const ele of val)
+               if (ele.length > 50)
+                  throw (new Error("In valid category id!"));
+
+            return (true);
+         })
+   ])
 }
 
 const adminCategoryValidation = new AdminCategoryValidationClass();

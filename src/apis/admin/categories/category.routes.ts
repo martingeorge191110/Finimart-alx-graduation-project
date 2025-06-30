@@ -34,5 +34,13 @@ CategoryRoutes.route("/:category_id/")
       adminCategoryController.DeleteCategory
    );
 
+CategoryRoutes.route("/hierarchy/")
+   .post(
+      categoryValidation.hierarchyVlidation(), ApiError.validation_error,
+      categoryController.CreateHierarchy
+   )
+   .get(
+      categoryController.getHierarchy
+   );
 
 export default CategoryRoutes;
