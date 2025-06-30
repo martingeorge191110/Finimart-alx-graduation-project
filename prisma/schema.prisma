@@ -26,6 +26,26 @@ enum PriceRange {
   Expensive
 }
 
+
+enum OrderStatus {
+  Pending
+  Confirmed
+  Cancelled
+  Returned
+}
+
+enum OrderPaymentStatus {
+  Paid
+  UnPaid
+  ReFunded
+}
+
+enum PaymentMethods {
+  Cash
+  Card
+  BankTransfer
+}
+
 model Admin {
   id             String  @id @default(uuid())
   first_name     String
@@ -78,6 +98,12 @@ model User {
   Company_Member_User Company? @relation("CompanyUserMember", fields: [company_id], references: [id])
 
   RefreshToken RefreshToken[] @relation("RefreshTokenUser")
+
+  Favourite_Products Favourite_Products[] @relation("UserAddFavourites")
+
+  Orders Orders[] @relation("OrderUser")
+
+  cart_items Cart_items[] @relation("UserAddToCart")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -136,6 +162,12 @@ model Company {
   Users         User[]  @relation("CompanyUserMember")
   Addresses Company_Address[] @relation("CompanyAddress")
 
+  Favourite_Products Favourite_Products[] @relation("CompanyFavouriteProducts")
+
+  Cart_items Cart_items[] @relation("CompanyCartItems")
+
+  Orders Orders[] @relation("OrderComapny")
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
@@ -151,6 +183,8 @@ model Company_Address {
 
   company_id String
   Company    Company @relation("CompanyAddress", fields: [company_id], references: [id], onDelete: Cascade)
+
+  orders Orders[] @relation("OrderCompanyAddress")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -214,6 +248,12 @@ model Product {
 
   Product_Variant Product_Variant[] @relation("ProductVariant") // will be added to product not in creating product
 
+  favourite_products Favourite_Products[] @relation("FavouriteCompanyProduct")
+
+  cart_items Cart_items[] @relation("ProductCartItems")
+
+  Order_Items Order_items[] @relation("ProductOrderItem")
+
   created_at            DateTime               @default(now())
   updated_at            DateTime               @updatedAt
   Best_Selling_Products Best_Selling_Products? @relation("BestSellingProduct")
@@ -240,6 +280,10 @@ model Product_Variant {
 
   product_id String
   Product    Product @relation("ProductVariant", fields: [product_id], references: [id], onDelete: Cascade)
+
+  cart_items Cart_items[] @relation("ProductVariantCartItems")
+
+  Product_Order_Items Order_items[] @relation("ProductVariantOrderItems")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -282,4 +326,113 @@ model Product_Specs {
   updated_at DateTime @updatedAt
 
   @@unique([specs_id, product_id])
+}
+
+model Favourite_Products {
+  id String @id @default(uuid())
+
+  company_id String
+  Company    Company @relation("CompanyFavouriteProducts", fields: [company_id], references: [id], onDelete: Cascade)
+
+  product_id String
+  Product    Product @relation("FavouriteCompanyProduct", fields: [product_id], references: [id], onDelete: Cascade)
+
+  created_by_id String
+  Created_By    User   @relation("UserAddFavourites", fields: [created_by_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Cart_items {
+  id String @id @default(uuid())
+
+  company_id String
+  Company    Company @relation("CompanyCartItems", fields: [company_id], references: [id], onDelete: Cascade)
+
+  product_id String
+  Product    Product @relation("ProductCartItems", fields: [product_id], references: [id], onDelete: Cascade)
+
+  product_variant_id String
+  Product_Variant    Product_Variant @relation("ProductVariantCartItems", fields: [product_variant_id], references: [id], onDelete: Cascade)
+
+  created_by_id String?
+  Created_By    User?   @relation("UserAddToCart", fields: [created_by_id], references: [id], onDelete: SetNull)
+
+  quantity Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([company_id, product_id])
+  @@index([company_id])
+}
+
+model Orders {
+  id              String @id @default(uuid())
+  order_no        Int    @default(autoincrement())
+  net_amount      Float  @default(0.0) //
+  shipping_amount Float  @default(0.0)
+  tax_amount      Float  @default(0.0)
+  discount_amount Float  @default(0.0)
+  sub_total       Float  @default(0.0) // sum of item line_totals
+  total_amount    Float  @default(0.0) // (subtotal – discount + tax + shipping)
+  currency        String
+
+  order_date DateTime
+
+  status            OrderStatus        @default(Pending) // ('pending', 'confirmed', 'cancelled')
+  payment_status    OrderPaymentStatus @default(UnPaid) // ('unpaid','paid','refunded')
+  payment_method    String // (e.g. "cash", "card", "bank transfer")
+  payment_reference PaymentMethods? //  in case of payment method is bank transfer (voucher number or transaction number on third party payment system)
+
+  company_id String // company id that create the order
+  Company    Company @relation("OrderComapny", fields: [company_id], references: [id])
+
+  address_id String?
+  Address    Company_Address? @relation("OrderCompanyAddress", fields: [address_id], references: [id], onDelete: SetNull)
+
+  created_by_id String? // user in this company who create this order
+  Created_By    User?   @relation("OrderUser", fields: [created_by_id], references: [id], onDelete: SetNull)
+
+  Order_Items Order_items[] @relation("OrderItems")
+
+  Invoice     Invoices? @relation("OrderInvoice")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Order_items {
+  id                   String @id @default(uuid())
+  quantity             Int
+  unit_price           Float // (the product’s price at time of order)
+  item_discount_amount Float
+  line_total           Float // (unit_price * quantity) – item_discount_amount
+
+  order_id String
+  Order    Orders @relation("OrderItems", fields: [order_id], references: [id], onDelete: Cascade)
+
+  product_id String?
+  Product    Product? @relation("ProductOrderItem", fields: [product_id], references: [id], onDelete: SetNull)
+
+  product_variant_id String?
+  Product_Variant    Product_Variant? @relation("ProductVariantOrderItems", fields: [product_variant_id], references: [id], onDelete: SetNull)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+model Invoices {
+  id             String   @id @default(uuid())
+  invoice_number String   @unique
+  issue_date     DateTime
+  pdf_url        String // PDF url of the invoice
+
+  order_id String @unique
+  Order    Orders @relation("OrderInvoice", fields: [order_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
