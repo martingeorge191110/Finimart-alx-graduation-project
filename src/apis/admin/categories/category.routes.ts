@@ -24,4 +24,15 @@ CategoryRoutes.route("/")
    )
 
 
+CategoryRoutes.route("/:category_id/")
+   .put(
+      adminCategoryValidation.updateCategoryValid(), ApiError.validation_error,
+      adminCategoryController.UpdateCategoryNames
+   )
+   .delete(
+      adminCategoryValidation.categoryIDParamValid(), ApiError.validation_error,
+      adminCategoryController.DeleteCategory
+   );
+
+
 export default CategoryRoutes;

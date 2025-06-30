@@ -65,6 +65,44 @@ class AdminCategoryControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+   public UpdateCategoryNames = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { website_name, category_name } = req.body;
+      const category: Category = (req as any).category;
+
+      try {
+         const updated_category = await this.service.updateCategoryNames( category.id, category_name, website_name );
+
+         // Invalidate the cache after creating a new category
+         try {
+            await redis.del("categories_hierarchy");
+         } catch (cacheError) {
+            console.error( "Error invalidating category hierarchy cache:", cacheError);
+         }
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully updated the category names", { ...updated_category }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public DeleteCategory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const category: Category = (req as any).category;
+
+      try {
+         const hasChildrenOrProducts = await this.service.hasChildrenOrProducts(category);
+
+         // checking whether the product has any hierarchy (categories or products)
+         if (hasChildrenOrProducts.hasChildren || hasChildrenOrProducts.hasProducts)
+            return (next(ApiError.create_error("Cannot delete this category, it has children or products!", 400)));
+         await this.service.resetCategoryHierarchyRedis();
+         await this.service.deleteCategoryByID(category.id);
+
+         return (globalUtils.SuccessfulyResponseJson( res, 200, "Successfully deleted the category", { id: category.id, category_name: category.category_name }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const adminCategoryController = new AdminCategoryControllerClass();

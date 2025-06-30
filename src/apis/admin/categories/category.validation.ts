@@ -60,6 +60,50 @@ class AdminCategoryValidationClass {
          .optional()
          .isInt({ min: 0, max: 3 }).withMessage("Not valid pagination, please follow the pagination rules!"),
    ])
+
+   public categoryIDParamValid = (): ValidationChain[] => ([
+      param("category_id")
+         .trim().notEmpty().withMessage("Category ID is Required!")
+         .isUUID().withMessage("Category ID must be a valid UUID!")
+         .isLength({ min: 5, max: 55 }).withMessage("Category id must between 5 and 55 characters")
+         .custom(async (val: string, { req }: Meta): Promise<boolean | void> => {
+            try {
+               const category = await this.service.getCategoryByID(val);
+
+               if (!category)
+                  throw (new Error("Category Not found!"));
+
+               (req as any).category = category;
+               return (true);
+            } catch (err) {
+               throw (err);
+            }
+         }),
+   ])
+
+   public updateCategoryValid = (): ValidationChain[] => ([
+      ...this.categoryIDParamValid(),
+      body("category_name")
+         .trim().notEmpty().withMessage("Category Name is Required!")
+         .isLength({ min: 3, max: 70 }).withMessage("Category name must between 5 and 70 characters")
+         .custom( async (val: string, { req }: Meta): Promise<boolean | void> => {
+            try {
+               const cat_id = req.params?.category_id
+               
+               const existingCategory = await this.service.findFamiliarCategory(val);
+
+    // Only throw an error if a category with the same name exists and it's NOT the same ID
+                  if (existingCategory && existingCategory.id !== cat_id) {
+                     throw new Error("You have this category with this name!");
+                  }
+               return (true);
+            } catch (err) {
+               throw (err);
+            }
+         }),
+      body("website_name")
+         .trim().notEmpty().withMessage("Category website Name is Required!"),
+   ])
 }
 
 const adminCategoryValidation = new AdminCategoryValidationClass();

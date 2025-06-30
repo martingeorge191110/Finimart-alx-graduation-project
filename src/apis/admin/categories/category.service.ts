@@ -67,6 +67,16 @@ class AdminCategoryService {
       }
    };
 
+   public getCategoryByID = async (category_id: string): Promise<Category | null> => {
+      try {
+         return (await this.configReplicaDB.category.findUnique({
+            where: { id: category_id }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   };
+
    public resetCategoryHierarchyRedis = async () => {
       try {
          return (await this.configRedis.del("categories_hierarchy"));
@@ -168,6 +178,47 @@ class AdminCategoryService {
 
 
          return (categories_data);
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public updateCategoryNames = async (category_id: string, new_category_name: string, website_name: string): Promise<Category> => {
+      try {
+         return (await this.configMainDB.category.update({
+            where: { id: category_id },
+            data: { category_name: new_category_name, website_name }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   
+   public hasChildrenOrProducts = async (category: Category) => {
+      try {
+         const hasChildren = await this.configReplicaDB.category.findFirst({
+            where: { parent_id: category.id }
+         });
+
+         const hasProducts = await this.configReplicaDB.product_Categories.findFirst({
+            where: { category_id: category.id }
+         });
+
+         return ({
+            hasChildren: hasChildren ? true : false,
+            hasProducts: hasProducts ? true : false
+         })
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public deleteCategoryByID = async (category_id: string): Promise<void> => {
+      try {
+         await this.configMainDB.category.delete({
+            where: { id: category_id }
+         });
       } catch (err) {
          throw (err);
       }
