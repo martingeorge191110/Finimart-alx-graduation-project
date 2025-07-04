@@ -74,6 +74,21 @@ class AdminCompanyControllerClass {
       }
    }
 
+   public BlockCompanyAccount = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const company: Company = (req as any).company;
+      const { block } = req.body;
+
+      try {
+         const updated_company = await this.service.updateCompanyData(company.id, { blocked: Boolean(block) });
+
+         await this.service.updateCompanyInRedis(updated_company);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfuly Verified the Company", { ...updated_company }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
 
 
 

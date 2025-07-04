@@ -6,6 +6,12 @@ import { companyService } from "../../company/company.service";
 
 class AdminCompanyValidatorClass extends CompanyValidatorClass {
 
+   public blockCompanyAccValid = (): ValidationChain[] => ([
+      ...this.companyParamIDValidDB(),
+      body("block")
+         .isBoolean().withMessage("Invalid Block input!")
+   ])
+
    public companyListFilterationValid = (): ValidationChain[] => ([
       query("page")
          .optional()

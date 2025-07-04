@@ -106,6 +106,36 @@ class AdminCompanyServiceClass {
       }
    }
 
+   public updateCompanyData = async (company_id: string, data: any) => {
+      try {
+         return (await (this.configMainDB.company.update({
+            where: { id: company_id },
+            data: {
+               ...data
+            }
+         })));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public updateCompanyInRedis = async (company_data: Company) => {
+      try {
+         const companyKey = `company:${company_data.id}`;
+         const exists = await this.configRedis.exists(companyKey);
+
+         if (exists) {
+            // Update the company data in Redis with 1 hour expiration
+            await this.configRedis.setEx(companyKey, 3600, JSON.stringify(company_data));
+            return (true);
+         }
+
+         return (false);
+      } catch (error) {
+         console.error(`Error updating company in Redis: ${error}`);
+         throw (error);
+      }
+   };
 }
 
 const adminCompanyService = new AdminCompanyServiceClass();

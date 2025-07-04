@@ -23,4 +23,10 @@ AdminCompanyRoutes.route("/:company_id/verify/")
       adminCompanyController.VerifyCompanyAccount
    )
 
+AdminCompanyRoutes.route("/:company_id/block/")
+   .put(
+      adminCompanyValidator.blockCompanyAccValid(), ApiError.validation_error,
+      adminCompanyController.BlockCompanyAccount
+   )
+
 export default AdminCompanyRoutes;
