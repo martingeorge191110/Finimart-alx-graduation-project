@@ -29,4 +29,10 @@ AdminCompanyRoutes.route("/:company_id/block/")
       adminCompanyController.BlockCompanyAccount
    )
 
+AdminCompanyRoutes.route("/:company_id/auth-letter/")
+   .get(
+      adminCompanyValidator.companyParamIDValidDB(), ApiError.validation_error,
+      adminCompanyController.CompanyAuthLetter
+   )
+
 export default AdminCompanyRoutes;

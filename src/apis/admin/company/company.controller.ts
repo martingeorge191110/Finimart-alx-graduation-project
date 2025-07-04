@@ -89,9 +89,20 @@ class AdminCompanyControllerClass {
       }
    }
 
+   public CompanyAuthLetter = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const company: Company = (req as any).company;
 
+      try {
+         if (!company.auth_letter)
+            return (next(ApiError.create_error("This Company has no Authorization Letter!", 404)));
 
+         const uri = await getTemporaryPDFUrl(company.auth_letter);
 
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfuly Retreived the Company Authorization Letter, URL just for 1 hour", { url: uri }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const adminCompanyController = new AdminCompanyControllerClass();
