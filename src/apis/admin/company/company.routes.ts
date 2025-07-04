@@ -41,4 +41,10 @@ AdminCompanyRoutes.route("/:company_id/wallet/")
       adminCompanyController.UpdateCompanyWallet
    )
 
+AdminCompanyRoutes.route("/wallets/")
+   .get(
+      adminCompanyValidator.getAllCompanyWalletsValidWithFilter(), ApiError.validation_error,
+      adminCompanyController.GetAllCompanyWallets
+   )
+
 export default AdminCompanyRoutes;

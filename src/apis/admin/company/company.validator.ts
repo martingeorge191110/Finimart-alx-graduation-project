@@ -80,6 +80,34 @@ class AdminCompanyValidatorClass extends CompanyValidatorClass {
          .isIn(["add", "subtract"]).withMessage("Not valid type, please follow the rules!")
    ])
 
+   public getAllCompanyWalletsValidWithFilter = (): ValidationChain[] => [
+      query("page")
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage("Not valid pagination, please follow the pagination rules!"),
+      query("limit")
+      .optional()
+      .isInt({ min: 1, max: 20 })
+      .withMessage("Not valid pagination, please follow the pagination rules!"),
+      query("min_balance")
+      .optional()
+      .isFloat({ min: 0 })
+      .withMessage("min_balance must be a positive number"),
+      query("max_balance")
+      .optional()
+      .isFloat({ min: 0 })
+      .withMessage("max_balance must be a positive number"),
+      query().custom((value, { req }: Meta) => {
+         // Validate logical relationship between min_balance and max_balance
+         // Prevent misuse or injection by ensuring min <= max if both are provided
+         const min = Number((req.query as any).min_balance);
+         const max = Number((req.query as any).min_balance);
+         if (!isNaN(min) && !isNaN(max) && min > max) {
+            throw new Error("min_balance must be less than or equal to max_balance");
+         }
+         return true;
+      }),
+   ];
 }
 
 const adminCompanyValidator = new AdminCompanyValidatorClass(companyService);

@@ -161,7 +161,53 @@ class AdminCompanyServiceClass {
       }
    }
 
+   public getAllCompanyWallet = async (page: number = 1, limit: number = 20, min_balance?: number, max_balance?: number) => {
+      try {
+         if (page < 1) throw new Error("Page number must be 1 or greater");
+         if (limit < 1 || limit > 20) throw new Error("Limit must be between 1 and 20.");
 
+         const balanceFilter: any = {};
+
+         if (typeof min_balance == "number") { balanceFilter.gte = min_balance };
+         if (typeof max_balance == "number") { balanceFilter.lte = max_balance };
+
+         const filteredBalance = Object.keys(balanceFilter).length > 0 ? { balance: balanceFilter } : {};
+
+         const totalWalletsWithFilter = await this.configReplicaDB.e_Wallet.count({
+            where: filteredBalance,
+         });
+
+         const wallets = await this.configReplicaDB.e_Wallet.findMany({
+            where: filteredBalance,
+            skip: (page - 1) * limit,
+            take: limit,
+            orderBy: { updated_at: "desc" },
+            select: {
+               balance: true,
+               company_id: true,
+               updated_at: true,
+               Company: {
+                  select: {
+                     name: true,
+                     Super_User: {
+                        select: { id: true, first_name: true, last_name: true, is_super_user: true,
+                        }
+                     }
+                  },
+               },
+            },
+         });
+
+         return {
+            total: totalWalletsWithFilter,
+            pages: Math.ceil(totalWalletsWithFilter / limit),
+            currentPage: page,
+            data: wallets,
+         };
+      } catch (err) {
+         throw err;
+      }
+   };
 }
 
 const adminCompanyService = new AdminCompanyServiceClass();

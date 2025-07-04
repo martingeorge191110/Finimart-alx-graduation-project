@@ -117,6 +117,20 @@ class AdminCompanyControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+   public GetAllCompanyWallets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+         const page = parseInt(req.query.page as string) || 1;
+         const limit = parseInt(req.query.limit as string) || 20;
+
+         const result = await this.service.getAllCompanyWallet(page, limit);
+         globalUtils.SuccessfulyResponseJson(res, 200, "Successfully Retrieved All Company Wallets", result);
+         
+      } catch (err) {
+         next(ApiError.create_error(String(err), 500));
+      }
+   };
+
 }
 
 const adminCompanyController = new AdminCompanyControllerClass();
