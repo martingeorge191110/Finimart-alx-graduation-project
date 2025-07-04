@@ -17,4 +17,10 @@ AdminCompanyRoutes.route("/") // --> its contains some query! (?filteration proc
       adminCompanyController.CompaniesList
    )
 
+AdminCompanyRoutes.route("/:company_id/verify/")
+   .put(
+      adminCompanyValidator.companyParamIDValidDB(), ApiError.validation_error,
+      adminCompanyController.VerifyCompanyAccount
+   )
+
 export default AdminCompanyRoutes;

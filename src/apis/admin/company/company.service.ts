@@ -91,6 +91,21 @@ class AdminCompanyServiceClass {
          throw (err);
       }
    }
+
+
+   public updateCompanyData = async (company_id: string, data: any) => {
+      try {
+         return (await (this.configMainDB.company.update({
+            where: { id: company_id },
+            data: {
+               ...data
+            }
+         })));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
 }
 
 const adminCompanyService = new AdminCompanyServiceClass();

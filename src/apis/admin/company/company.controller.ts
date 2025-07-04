@@ -17,6 +17,29 @@ class AdminCompanyControllerClass {
       this.service = adminCompanyService;
    }
 
+   public VerifyCompanyAccount = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const company: Company = (req as any).company;
+      const { verified } = req.body;
+
+      try {
+         if (verified === "accept") {
+            const updated_company = await this.service.updateCompanyData(company.id, { verified: true });
+            await this.service.updateCompanyInRedis(updated_company);
+            await this.service.updateCompanyWallet(company.id, 0, "add");
+            return globalUtils.SuccessfulyResponseJson(res, 200, "Successfully Verified the Company", { ...updated_company });
+         }
+
+         if (verified === "rejected") {
+            await this.service.deleteCompanyByID(company.id);
+            return globalUtils.SuccessfulyResponseJson(res, 200, "Company Rejected and Deleted Successfully", {});
+         }
+
+         return next(ApiError.create_error("Invalid 'verified' value. Must be 'accept' or 'rejected'", 400));
+      } catch (err) {
+         return next(ApiError.create_error(String(err), 500));
+      }
+   };
+
    public CompaniesList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const { page, limit, verified, city, country, min_amount_purcahsed, max_amount_purcahsed, sort_by } = req.query;
 
@@ -50,6 +73,10 @@ class AdminCompanyControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+
+
+
 }
 
 const adminCompanyController = new AdminCompanyControllerClass();
