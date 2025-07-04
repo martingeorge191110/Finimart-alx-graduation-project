@@ -35,4 +35,10 @@ AdminCompanyRoutes.route("/:company_id/auth-letter/")
       adminCompanyController.CompanyAuthLetter
    )
 
+AdminCompanyRoutes.route("/:company_id/wallet/")
+   .put(
+      adminCompanyValidator.updateCompanyWalletValid(), ApiError.validation_error,
+      adminCompanyController.UpdateCompanyWallet
+   )
+
 export default AdminCompanyRoutes;

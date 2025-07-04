@@ -103,6 +103,20 @@ class AdminCompanyControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+   public UpdateCompanyWallet = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      console.log("Updating company wallet:", req.body);
+      const { amount, type } = req.body;
+      const company: Company = (req as any).company;
+
+      try {
+         const updated_wallet = await this.service.updateCompanyWallet(company.id, amount, type);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfuly Updated the Company Wallet", {...updated_wallet}))
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const adminCompanyController = new AdminCompanyControllerClass();

@@ -69,6 +69,17 @@ class AdminCompanyValidatorClass extends CompanyValidatorClass {
             }
          }),
    ])
+
+   public updateCompanyWalletValid = (): ValidationChain[] => (
+      console.log("updateCompanyWalletValid"),
+      [
+      ...this.companyParamIDValidDB(),
+      body("amount")
+         .isInt({ min: 100 }).withMessage("Not valid amount, please follow the rules!"),
+      body("type")
+         .isIn(["add", "subtract"]).withMessage("Not valid type, please follow the rules!")
+   ])
+
 }
 
 const adminCompanyValidator = new AdminCompanyValidatorClass(companyService);

@@ -136,6 +136,32 @@ class AdminCompanyServiceClass {
          throw (error);
       }
    };
+
+
+   public updateCompanyWallet = async (company_id: string, amount: number, type: "add" | "subtract") => {
+      try {
+         const transaction = await this.configMainDB.$transaction(async (tx) => {
+            const e_Wallet = await tx.e_Wallet.findUnique({ where: { company_id } });
+
+            if (!e_Wallet) {
+               // special case !!
+               await tx.e_Wallet.create({ data: { company_id } });
+            }
+
+            const updatedWallet = await tx.e_Wallet.update({
+               where: { company_id },
+               data: { balance: type === "add" ? { increment: amount } : { decrement: amount } }
+            });
+
+            return (updatedWallet);
+         })
+         return (transaction);
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+
 }
 
 const adminCompanyService = new AdminCompanyServiceClass();
