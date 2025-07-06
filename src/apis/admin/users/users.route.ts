@@ -18,4 +18,17 @@ AdminUsersRouter.route("/")
    )
 
 
+AdminUsersRouter.route('/:user_id/')
+   .delete(
+      AdminUsersValidator.userIDParamValid(), ApiError.validation_error,
+      AdminUsersController.DeleteUser
+   )
+
+AdminUsersRouter.route('/:user_id/')
+   .put(
+      AdminUsersValidator.userIDParamValid(), AdminUsersValidator.updateUserValid(),
+      ApiError.validation_error, AdminUsersController.UpdateUserInfoByID
+   )
+
+
 export default AdminUsersRouter;

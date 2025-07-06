@@ -98,6 +98,47 @@ class AdminUsersServiceClass {
          console.error('Error invalidating user list cache:', err);
       }
    }
+
+   public getUserById = async (user_id: string) => {
+      try {
+         return (await this.configReplicaDB.user.findUnique({
+            where: { id: user_id }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public deleteUserByID = async (user_id: string) => {
+      try {
+         return (await this.configMainDB.user.delete({
+            where: { id: user_id }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public updateUserInfo = async (user_id: string, first_name?: string, last_name?: string, email?: string,
+      phone_number?: string, is_super_user?: boolean, user_role?: any) => {
+      try {
+         const updateData: any = {};
+
+         if (first_name !== undefined) updateData.first_name = first_name;
+         if (last_name !== undefined) updateData.last_name = last_name;
+         if (email !== undefined) updateData.email = email;
+         if (phone_number !== undefined) updateData.phone_number = phone_number;
+         if (is_super_user !== undefined) updateData.is_super_user = is_super_user;
+         if (user_role !== undefined) updateData.user_role = user_role;
+
+         return await this.configMainDB.user.update({
+            where: { id: user_id },
+            data: updateData,
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const AdminUsersService = new AdminUsersServiceClass();
