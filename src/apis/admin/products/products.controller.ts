@@ -260,6 +260,47 @@ class AdminProductsControllerClass {
       }
    }
 
+   public removeCategoryFromProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { category_id } = req.body;
+      const { product_id } = req.params;
+
+      try {
+         const find_product = await this.service.findProductByID(product_id);
+         if (!find_product)
+            return (next(ApiError.create_error("Invalid Product!", 404)));
+
+         for (const ele of find_product.Product_Categories)
+            if (ele.category_id !== category_id)
+               return (next(ApiError.create_error("There is not relation to remove!", 400)));
+
+         await this.service.removeProdcutCategory(find_product.id, category_id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully Delete a relation between category and prodcut!"));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public addCategoryToProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { category_id } = req.body;
+      const { product_id } = req.params;
+
+      try {
+         const find_product = await this.service.findProductByID(product_id);
+         if (!find_product)
+            return (next(ApiError.create_error("Invalid Product!", 404)));
+
+         for (const ele of find_product.Product_Categories)
+            if (ele.category_id === category_id)
+               return (next(ApiError.create_error("The relation already exists!", 400)));
+
+         const newRelation = await this.service.addProdcutCategory(find_product.id, category_id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully Delete a relation between category and prodcut!", { ...newRelation }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const adminProductController = new AdminProductsControllerClass();

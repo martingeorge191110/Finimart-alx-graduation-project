@@ -83,4 +83,18 @@ AdminProductRoutes.route("/:product_id/variants/:variant_id/")
       adminProductController.UpdateProductVariant
    )
 
+AdminProductRoutes.route("/:product_id/remove-category/")
+   .put(
+      productValidator.productParamValidID(), adminProductValidator.removeOrAddCategoryToProduct(),
+      ApiError.validation_error,
+      adminProductController.removeCategoryFromProduct
+   )
+
+AdminProductRoutes.route("/:product_id/add-category/")
+   .put(
+      productValidator.productParamValidID(), adminProductValidator.removeOrAddCategoryToProduct(),
+      ApiError.validation_error,
+      adminProductController.addCategoryToProduct
+   )
+
 export default AdminProductRoutes;

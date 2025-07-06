@@ -146,6 +146,27 @@ class AdminProductValidatorClass {
          .optional()
          .isInt().withMessage("Invalid quantity input!")
    ])
+
+   public removeOrAddCategoryToProduct = (): ValidationChain[] => ([
+      body("category_id")
+         .trim().notEmpty().withMessage("Category ID is Required!")
+         .isUUID().withMessage("Invalid Category ID!")
+         .custom(async (val: string, { req }: Meta): Promise<boolean | void> => {
+            try {
+               const category = await this.service.getCategoryByID(val);
+
+               if (!category) {
+                  (req as any).status_code = 404;
+                  throw (new Error("Invalid Category!"));
+               }
+
+               (req as any).category = category;
+               return (true);
+            } catch (err) {
+               throw (err);
+            }
+         })
+   ])
 }
 
 const adminProductValidator = new AdminProductValidatorClass();

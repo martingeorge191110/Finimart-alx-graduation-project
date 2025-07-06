@@ -268,6 +268,26 @@ class AdminProductServiceClass {
          throw (err);
       }
    }
+
+   public removeProdcutCategory = async (product_id: string, category_id: string) => {
+      try {
+         await this.configMainDB.product_Categories.delete({
+            where: { product_id_category_id: { product_id, category_id } }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public addProdcutCategory = async (product_id: string, category_id: string) => {
+      try {
+         return (await this.configMainDB.product_Categories.create({
+            data: { product_id, category_id }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const adminProductService = new AdminProductServiceClass();
