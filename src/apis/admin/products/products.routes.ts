@@ -111,4 +111,15 @@ AdminProductRoutes.route("/:product_id/specs/:specs_id/")
       adminProductController.UpdateProductSpecs
    )
 
+AdminProductRoutes.route("/:product_id/bestsellers/")
+   .post(
+      adminProductValidator.productParamValidID(), ApiError.validation_error,
+      adminProductController.addBestSellingProduct
+   )
+
+   .delete(
+      adminProductValidator.productParamValidID(), ApiError.validation_error,
+      adminProductController.removeBestSellingProduct
+   )
+
 export default AdminProductRoutes;

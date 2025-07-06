@@ -363,6 +363,42 @@ class AdminProductServiceClass {
          throw (err);
       }
    }
+
+   public addBestSeller = async (product_id: string): Promise<void> => {
+      try {
+         const exists = await this.configMainDB.best_Selling_Products.findUnique({
+            where: { product_id },
+         });
+
+         if (exists) {
+            throw new Error("Product already exists in best sellers list");
+         }
+
+         await this.configMainDB.best_Selling_Products.create({
+            data: { product_id }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public removeBestSeller = async (product_id: string): Promise<void> => {
+      try {
+         const exists = await this.configMainDB.best_Selling_Products.findUnique({
+            where: { product_id },
+         });
+
+         if (!exists) {
+            throw new Error("Product does not exist in the best sellers list");
+         }
+
+         await this.configMainDB.best_Selling_Products.delete({
+            where: { product_id },
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const adminProductService = new AdminProductServiceClass();

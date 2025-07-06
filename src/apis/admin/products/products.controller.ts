@@ -384,6 +384,27 @@ class AdminProductsControllerClass {
       }
    }
 
+   public addBestSellingProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+         const { product_id } = req.params;
+         await this.service.addBestSeller(product_id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Product added to best sellers list"));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public removeBestSellingProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+         const { product_id } = req.params;
+         await this.service.removeBestSeller(product_id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Product removed from the best sellers list successfully!"));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const adminProductController = new AdminProductsControllerClass();

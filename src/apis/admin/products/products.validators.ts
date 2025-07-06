@@ -187,6 +187,12 @@ class AdminProductValidatorClass {
          .isLength({ min: 1, max: 15 }).withMessage("Invalid Specs value!"),
    ])
 
+   public productParamValidID = (): ValidationChain[] => ([
+      param("product_id")
+         .trim().notEmpty().withMessage("Product id is Required in Params!")
+         .isUUID().withMessage("No valid ID")
+         .isLength({ min: 5, max: 50 }).withMessage("Product id should be between 5 and 50 charachters!")
+   ])
 }
 
 const adminProductValidator = new AdminProductValidatorClass();
