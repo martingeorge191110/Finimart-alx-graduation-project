@@ -4,6 +4,12 @@ import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "../config/swagger";
 import AdminAPIRoute from "./admin/admin.api.route";
 import { AuthRouter } from "./auth/auth.route";
+import ProductRoutes from "./products/products.routes";
+import FavouriteRoutes from "./favourites/favourite.routes";
+import CartRouter from "./cart/cart.routes";
+import CategoryRoutes from "./categories/category.routes";
+import OrderRoutes from "./orders/order.routes";
+import CompanyRoutes from "./company/company.routes";
 
 const ApiV1Router: Router = Router();
 
@@ -15,5 +21,16 @@ ApiV1Router.use('/admin', AdminAPIRoute);
 
 ApiV1Router.use('/auth', AuthRouter);
 
+ApiV1Router.use('/category', CategoryRoutes)
+
+ApiV1Router.use("/products", ProductRoutes);
+
+ApiV1Router.use("/favouries", FavouriteRoutes)
+
+ApiV1Router.use('/cart', CartRouter);
+
+ApiV1Router.use('/orders', OrderRoutes);
+
+ApiV1Router.use('/company', CompanyRoutes);
 
 export default ApiV1Router;
