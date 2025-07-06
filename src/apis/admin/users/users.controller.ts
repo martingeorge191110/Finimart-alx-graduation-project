@@ -76,6 +76,20 @@ class AdminUsersControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+   public blockUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { user_id } = req.params;
+      const { block } = req.body;
+
+      try {
+         await this.service.blockUserbyId(user_id, Boolean(block));
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "User blocked successfully!"))
+
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const AdminUsersController = new AdminUsersControllerClass();

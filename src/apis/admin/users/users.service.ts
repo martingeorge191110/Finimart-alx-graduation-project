@@ -139,6 +139,17 @@ class AdminUsersServiceClass {
          throw (err);
       }
    }
+
+   public blockUserbyId = async (user_id: string, is_blocked: boolean) => {
+      try {
+         return await this.configMainDB.user.update({
+            where: { id: user_id },
+            data: { is_blocked },
+         });
+      } catch (err) {
+         throw (err);
+      }
+   };
 }
 
 const AdminUsersService = new AdminUsersServiceClass();

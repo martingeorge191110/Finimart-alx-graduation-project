@@ -30,5 +30,10 @@ AdminUsersRouter.route('/:user_id/')
       ApiError.validation_error, AdminUsersController.UpdateUserInfoByID
    )
 
+AdminUsersRouter.route('/:user_id/block/')
+   .patch(
+      AdminUsersValidator.userIDParamValid(), ApiError.validation_error,
+      AdminUsersController.blockUser
+   )
 
 export default AdminUsersRouter;
