@@ -1,11 +1,11 @@
 {
   "name": "api-server",
   "version": "1.0.0",
-  "main": "dest/server.js",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon src/server.ts",
     "build": "tsc",
-    "start": "nodemon dist/server.js",
+    "start": "node dist/server.js",
     "migrate": "npx prisma migrate dev"
   },
   "keywords": [],

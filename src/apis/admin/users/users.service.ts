@@ -98,6 +98,19 @@ class AdminUsersServiceClass {
          console.error('Error invalidating user list cache:', err);
       }
    }
+
+   /**
+    * @param user_id - The ID of the user to invalidate
+    */
+   public getUserById = async (user_id: string) => {
+      try {
+         return (await this.configReplicaDB.user.findUnique({
+            where: { id: user_id }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const AdminUsersService = new AdminUsersServiceClass();
