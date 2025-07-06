@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import { Admin } from "../../../../generated/prisma";
 import AdminAuthService from "./auth.admin.service";
 import AdminAuthUtilies from "./auth.admin.utilies";
-import globalUtils from "../../../utils/globals";
+import globalUtils from "../../../utilies/globals";
 import { Admin_JWT_PAYLOAD } from "../../../types/express";
 import crypto from 'crypto';
 

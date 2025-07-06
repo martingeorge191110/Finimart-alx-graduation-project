@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import adminDashboardService from "./dashboard.service";
 import ApiError from "../../../middlewares/error.handler";
 import { Admin_JWT_PAYLOAD } from "../../../types/express";
-import globalUtils from "../../../utils/globals";
+import globalUtils from "../../../utilies/globals";
 
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { NextFunction, Request, Response } from "express";
 import ApiError from "../../../middlewares/error.handler";
-import globalUtils from "../../../utils/globals";
+import globalUtils from "../../../utilies/globals";
 import { Company } from "../../../../generated/prisma";
 import adminUtilies from "../admin.utilies";
 import adminCompanyService from "./company.service";

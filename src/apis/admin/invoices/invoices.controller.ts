@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Request, Response, NextFunction } from "express";
 import AdminInvoicesService from "./invoices.service";
-import globalUtils from "../../../utils/globals";
+import globalUtils from "../../../utilies/globals";
 import ApiError from "../../../middlewares/error.handler";
 
 class AdminInvoicesControllerClass {

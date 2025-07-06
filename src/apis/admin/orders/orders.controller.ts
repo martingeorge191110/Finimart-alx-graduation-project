@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import adminOrderService from "./orders.service";
 import ApiError from "../../../middlewares/error.handler";
 import { OrderByType, OrderStatusType } from "../../../types/admin/orders.admin";
-import globalUtils from "../../../utils/globals";
+import globalUtils from "../../../utilies/globals";
 import { OrderPaymentStatus, OrderStatus } from "../../../../generated/prisma";
 import adminDashboardService from "../dashboard/dashboard.service";
 

@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import categoryService from "../../categories/category.service";
 import ApiError from "../../../middlewares/error.handler";
 import { Admin_JWT_PAYLOAD } from "../../../types/express";
-import globalUtils from "../../../utils/globals";
+import globalUtils from "../../../utilies/globals";
 import { Category } from "../../../../generated/prisma";
 import redis from "../../../config/redis.config";
 import adminCategoryService from "./category.service";

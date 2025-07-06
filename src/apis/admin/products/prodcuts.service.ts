@@ -299,7 +299,7 @@ class AdminProductServiceClass {
                   select: { id: true, is_active: true }
                },
                _count: {
-                  select: { Product_Order_items: true }
+                  select: { Product_Order_Items: true }
                }
             }
          }));
