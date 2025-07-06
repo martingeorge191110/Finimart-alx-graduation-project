@@ -28,4 +28,11 @@ AdminProductRoutes.route("/")
       adminProductController.GetProductsPagination
    )
 
+AdminProductRoutes.route("/bestsellers/")
+   .get(
+      adminProductController.getBestSellingProducts
+   )
+
+
+   
 export default AdminProductRoutes;

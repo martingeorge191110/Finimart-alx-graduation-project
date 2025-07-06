@@ -61,6 +61,18 @@ class AdminProductsControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+   public getBestSellingProducts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+         const bestSellingProducts = await this.service.getBestSellers();
+         if (!bestSellingProducts || bestSellingProducts.length === 0) {
+            return globalUtils.SuccessfulyResponseJson(res, 200, "No best selling products found.", []);
+         }
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Best Selling Products fetched successfully!", bestSellingProducts));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const adminProductController = new AdminProductsControllerClass();

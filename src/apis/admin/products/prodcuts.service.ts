@@ -78,6 +78,36 @@ class AdminProductServiceClass {
          throw (err);
       }
    }
+
+   public getBestSellers =  async () => {
+      try {
+         return await this.configReplicaDB.best_Selling_Products.findMany({
+            take: 8,
+            orderBy: { created_at: 'desc' },
+            select: { product_id: true,
+               Product : {
+                  select : {
+                     product_title: true,
+                     product_code: true,
+                     description: true,
+                     Brand : true,
+                     price_range : true,
+                     quantity: true,
+                     is_active: true,
+                     Product_Variant : {
+                        select : { size: true,
+                           price: true,
+                           quantity: true,
+                        }
+                     }
+                  }
+               }
+            }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const adminProductService = new AdminProductServiceClass();
