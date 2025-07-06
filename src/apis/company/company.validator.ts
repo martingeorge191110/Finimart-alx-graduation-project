@@ -35,6 +35,29 @@ class CompanyValidatorClass {
          }),
    ])
 
+   public valdiateOrderNumber = (): ValidationChain[] => ([
+      query("order_no")
+         .optional()
+         .isNumeric().withMessage("Order Number must be a number!")
+         .isInt({ min: 1 }).withMessage("Order Number must be greater than 0!")
+   ])
+
+   public validatePagination = (): ValidationChain[] => ([
+      query("page")
+         .optional()
+         .isNumeric().withMessage("Page must be a number!")
+         .isInt({ min: 1 }).withMessage("Page must be greater than 0!"),
+      query("limit")
+         .optional()
+         .isNumeric().withMessage("Limit must be a number!")
+         .isInt({ min: 1, max: 100 }).withMessage("Limit must be between 1 and 100!")
+   ])
+
+   public validateOrdersList = (): ValidationChain[] => ([
+      ...this.valdiateOrderNumber(),
+      ...this.validatePagination(),
+   ])
+
 }
 
 const companyValidator = new CompanyValidatorClass(companyService);

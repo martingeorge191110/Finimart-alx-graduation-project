@@ -16,10 +16,12 @@ const {
 
 const {
    companyParamIDValidDB,
+   validateOrdersList
 } = companyValidator;
 
 const {
-   Dashboard
+   Dashboard,
+   GetPendingOrders, GetOrdersHistory
 } = companyController;
 
 CompanyRoutes.use(
@@ -32,6 +34,18 @@ CompanyRoutes.route("/:company_id/dashboard/")
       UserCompanyIDs,
       companyParamIDValidDB(), ApiError.validation_error,
       Dashboard
+   )
+
+CompanyRoutes.route("/pending-orders/") // req.query : { order_no?: number }
+   .get(
+      validateOrdersList(), ApiError.validation_error,
+      GetPendingOrders
+   )
+
+CompanyRoutes.route("/orders-history/") // req.query : { order_no?: number }
+   .get(
+      validateOrdersList(), ApiError.validation_error,
+      GetOrdersHistory // confirmed and completed orders
    )
 
 export default CompanyRoutes;

@@ -66,6 +66,79 @@ class CompanyServiceClass {
          throw (err);
       }
    }
+
+   public getPendingOrders = async (company_id: string, page: number, limit: number, order_no?: number) => {
+      try {
+         const where: any = { company_id, status: "Pending" };
+
+         if (order_no)
+            where.order_no = order_no;
+
+
+         const [orders, total_orders] = await Promise.all([
+            await this.configReplicaDB.orders.findMany({
+               skip: (page - 1) * limit,
+               take: limit,
+               where,
+               orderBy: { created_at: "desc" },
+               select: {
+                  id: true, order_no: true, status: true, total_amount: true, created_at: true,
+                  updated_at: true,
+                  Created_By: {
+                     select: { id: true, first_name: true, last_name: true }
+                  },
+                  Address: {
+                     select: { id: true, street_address: true, city: true, country: true, building_no: true }
+                  }
+               }
+            }),
+            this.configReplicaDB.orders.count({ where })
+         ]);
+         const total_pages = Math.ceil(total_orders / limit);
+
+         return ({
+            orders, total_orders, total_pages, current_page: page, limit
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public getOrdersHistory = async (company_id: string, page: number, limit: number, order_no?: number) => {
+      try {
+         const where: any = { company_id, status: 'Confirmed' };
+
+         if (order_no)
+            where.order_no = order_no;
+
+         const [orders, total_orders] = await Promise.all([
+            await this.configReplicaDB.orders.findMany({
+               skip: (page - 1) * limit,
+               take: limit,
+               where,
+               orderBy: { created_at: "desc" },
+               select: {
+                  id: true, order_no: true, status: true, total_amount: true, created_at: true,
+                  updated_at: true,
+                  Created_By: {
+                     select: { id: true, first_name: true, last_name: true }
+                  },
+                  Address: {
+                     select: { id: true, street_address: true, city: true, country: true, building_no: true }
+                  }
+               }
+            }),
+            this.configReplicaDB.orders.count({ where })
+         ]);
+         const total_pages = Math.ceil(total_orders / limit);
+
+         return ({
+            orders, total_orders, total_pages, current_page: page, limit
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const companyService = new CompanyServiceClass();
