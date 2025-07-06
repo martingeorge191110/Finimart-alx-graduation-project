@@ -25,7 +25,7 @@ ApiV1Router.use('/category', CategoryRoutes)
 
 ApiV1Router.use("/products", ProductRoutes);
 
-ApiV1Router.use("/favouries", FavouriteRoutes)
+ApiV1Router.use("/favourties", FavouriteRoutes)
 
 ApiV1Router.use('/cart', CartRouter);
 
