@@ -205,6 +205,18 @@ class AdminProductServiceClass {
          throw (err);
       }
    }
+
+   public newProductVariant = async (product_id: string, size: string, price: number, quantity: number) => {
+      try {
+         return (await this.configMainDB.product_Variant.create({
+            data: {
+               size, price, quantity, product_id
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const adminProductService = new AdminProductServiceClass();

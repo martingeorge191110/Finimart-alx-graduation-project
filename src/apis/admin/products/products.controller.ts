@@ -186,6 +186,29 @@ class AdminProductsControllerClass {
       }
    }
 
+   public addProductVaraint = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { size, price, quantity} = req.body;
+      const { product_id } = req.params;
+
+      try {
+         const find_product = await this.service.findProductByID(product_id);
+         if (!find_product)
+            return (next(ApiError.create_error("In valid Product!", 404)));
+
+         let variants_quantity = 0;
+         for (const ele of find_product.Product_Variant)
+            variants_quantity += ele.quantity;
+
+         if (quantity > (find_product.quantity - variants_quantity))
+            return (next(ApiError.create_error("In valid Product Quantity!", 400)));
+         await productService.resetProductCache(product_id);
+         const product_variant = await this.service.newProductVariant(product_id, size, price, quantity);
+         return (globalUtils.SuccessfulyResponseJson(res, 201, "Successfully new variant Created!", { ...product_variant }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
 }
 
 const adminProductController = new AdminProductsControllerClass();

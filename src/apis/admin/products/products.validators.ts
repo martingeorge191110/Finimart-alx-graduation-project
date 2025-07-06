@@ -122,6 +122,17 @@ class AdminProductValidatorClass {
          })
          .isBoolean().withMessage("Active status should be boolean!")
    ])
+
+   public addProductVariant = (): ValidationChain[] => ([
+      body("size")
+         .trim().notEmpty().withMessage("Size is Required!")
+         .isLength({ max: 10 }).withMessage("Invalid size input!"),
+      body("price")
+         .isNumeric().withMessage("Invalid Price input!"),
+      body("quantity")
+         .toInt()
+         .isInt().withMessage("Invalid quantity input!")
+   ])
 }
 
 const adminProductValidator = new AdminProductValidatorClass();

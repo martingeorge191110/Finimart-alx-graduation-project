@@ -63,4 +63,11 @@ AdminProductRoutes.route("/:product_id/image/")
       adminProductController.updateProductImg
    )
 
+AdminProductRoutes.route("/:product_id/variants/")
+   .post(
+      productValidator.productParamValidID(), adminProductValidator.addProductVariant(),
+      ApiError.validation_error,
+      adminProductController.addProductVaraint
+   )
+
 export default AdminProductRoutes;
