@@ -55,6 +55,26 @@ class AdminOrdersControllerClass {
    }
 
 
+   public UpdateOrderStatusAndPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { order_id } = req.params;
+      const { status, payment_status } = req.body;
+      const statusValue: OrderStatus = status as OrderStatus;
+      const paymentStatusValue = payment_status ? payment_status as OrderPaymentStatus : undefined;
+
+      try {
+         const order = await this.service.getOrderByID(order_id);
+         if (!order)
+            return (next(ApiError.create_error("Order not found", 404)));
+         if (paymentStatusValue && order.payment_status === paymentStatusValue && order.status === statusValue)
+            return (next(ApiError.create_error("Order already has this status and payment status", 400)));
+         await adminDashboardService.resetStatsCache();
+         const updatedOrder = await this.service.updateOrderStatusAndPayment(order_id, statusValue, paymentStatusValue);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Order status and payment status updated successfully", { order: updatedOrder }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const adminOrderController = AdminOrdersControllerClass.createInstance();

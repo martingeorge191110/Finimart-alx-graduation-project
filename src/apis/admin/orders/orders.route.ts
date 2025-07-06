@@ -21,5 +21,9 @@ AdminOrderRoutes.route("/:order_id/")
       adminOrderValidator.orderIDValid(), ApiError.validation_error,
       adminOrderController.GetSpecificOrderDetails
    )
+   .patch(
+      adminOrderValidator.updateOrderStatusAndPaymentValid(), ApiError.validation_error,
+      adminOrderController.UpdateOrderStatusAndPayment
+   )
 
 export default AdminOrderRoutes;

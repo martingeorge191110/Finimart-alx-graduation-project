@@ -41,6 +41,15 @@ class AdminOrdersValidatorClass {
    ])
 
 
+   public updateOrderStatusAndPaymentValid = (): ValidationChain[] => ([
+      ...this.orderIDValid(),
+      body("status")
+         .trim().notEmpty().withMessage("Order status is required!")
+         .isIn(['Pending', 'Confirmed', 'Cancelled', 'Returned']).withMessage("Invalid Status option!"),
+      body("payment_status")
+         .optional()
+         .isIn(['UnPaid', 'Paid', 'ReFunded']).withMessage("Invalid Payment Status option!"),
+   ])
 }
 
 const adminOrderValidator = AdminOrdersValidatorClass.createInstance();

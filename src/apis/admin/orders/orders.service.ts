@@ -116,6 +116,20 @@ class AdminOrdersServiceClass {
          throw (err);
       }
    }
+
+   public updateOrderStatusAndPayment = async (order_id: string, status: OrderStatus, payment_status?: OrderPaymentStatus) => {
+      try {
+         return (await this.configMainDB.orders.update({
+            where: { id: order_id },
+            data: {
+               status,
+               payment_status
+            }
+         }))
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const adminOrderService = AdminOrdersServiceClass.createInstance();
