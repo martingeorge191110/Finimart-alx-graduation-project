@@ -63,6 +63,17 @@ class CompanyMiddlewares {
       return (next());
    }
 
+   public isSuperUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const payload: JWT_PAYLOAD = (req as any).payload;
+
+      if (!payload.is_super_user)
+         return (next(ApiError.create_error("Forbidden: You are not a super user", 403)));
+
+      if (payload.is_super_user !== true)
+         return (next(ApiError.create_error("Forbidden: You are not a super user", 403)));
+
+      return (next());
+   }
 }
 
 export default CompanyMiddlewares;

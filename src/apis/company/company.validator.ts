@@ -58,6 +58,59 @@ class CompanyValidatorClass {
       ...this.validatePagination(),
    ])
 
+   public validateCreateUser = (): ValidationChain[] => ([
+      body("first_name")
+         .trim().notEmpty().withMessage("First name is required")
+         .isLength({ min: 3, max: 50 }).withMessage("First name must be between 3 and 50 characters"),
+      body("last_name")
+         .trim().notEmpty().withMessage("Last name is required")
+         .isLength({ min: 3, max: 50 }).withMessage("Last name must be between 3 and 50 characters"),
+      body("email")
+         .trim().notEmpty().withMessage("Email is required")
+         .isEmail().withMessage("Email is invalid")
+         .isLength({ min: 10, max: 200 }).withMessage("Email must be between 1 and 200 characters")
+         .bail()
+         .custom(async (val: string, { req }: Meta): Promise<void | boolean> => {
+            const user: (User | null) = await this.service.getUserByEmail(val);
+
+            if (user)
+               throw (new Error("Email already exists"));
+
+            return (true);
+         }),
+      body("password")
+         .trim().notEmpty().withMessage("Password is required")
+         .isLength({ min: 8, max: 200 }).withMessage("Password must be between 8 and 200 characters"),
+      body("confirm_password")
+         .trim().notEmpty().withMessage("Confirm password is required")
+         .isLength({ min: 8, max: 200 }).withMessage("Confirm password must be between 8 and 200 characters")
+         .custom((val: string, { req }: Meta): void | boolean => {
+            if (val !== (req as any).body.password) {
+               throw (new Error("Passwords do not match"));
+            }
+            return (true);
+         }),
+      body("phone_number")
+         .trim().notEmpty().withMessage("Phone number is required")
+         .isMobilePhone("ar-EG").withMessage("Phone number is invalid")
+         .isLength({ min: 10, max: 15 }).withMessage("Phone number must be between 10 and 15 characters")
+         .bail()
+         .custom(async (val: string, { req }: Meta): Promise<void | boolean> => {
+            try {
+               const user = await this.service.getUserByPhoneNumber(val);
+               if (user)
+                  throw (new Error("Phone number already exists"));
+
+               return (true);
+            } catch (err) {
+               throw (err);
+            }
+         }),
+      body('role')
+         .trim().notEmpty().withMessage("Role is required")
+         .isIn(["Controller", "Sub_Controller", "Order_Maker"]).withMessage("Role must be one of the following: Controller, Sub_Controller, Order_Maker")
+   ])
+
 }
 
 const companyValidator = new CompanyValidatorClass(companyService);

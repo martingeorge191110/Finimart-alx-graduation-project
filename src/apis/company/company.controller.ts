@@ -84,6 +84,44 @@ class CompanyControllerClass {
       }
    }
 
+   public GetCompanyUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const company: Company = (req as any).company;
+
+      try {
+         const {
+            users, total_users
+         } = await this.service.getCompanyUsers(company.id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfuly retreived the company users!", {
+            users,
+            total_users
+         }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public CreateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const company: Company = (req as any).company;
+      const { first_name, last_name, email, password, phone_number, user_role } = req.body;
+
+      try {
+         const user_count: number = await this.service.getCompanyUsersCount(company.id);
+         if (user_count >= this.MAX_USERS)
+            return (next(ApiError.create_error(`You can not add more than ${this.MAX_USERS} users to your company!`, 403)));
+
+         const user = await this.service.createUser({
+            first_name, last_name, email, password, phone_number, user_role, company_id: company.id
+         });
+
+         return (globalUtils.SuccessfulyResponseJson(res, 201, "User created successfully!", {
+            ...user
+         }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
 }
 
 const companyController = new CompanyControllerClass();
