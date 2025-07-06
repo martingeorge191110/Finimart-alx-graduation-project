@@ -12,7 +12,6 @@ class AdminUtilies {
       this.configRedis = redis;
    }
 
-   
    /**
     * @description - Recursion function that retreieve the children hierarchy
     * @param categories - Root Categories to get children hierarchy
@@ -39,6 +38,42 @@ class AdminUtilies {
       return (hierarchy);
    };
 
+   public isUsersListCachable = (query: {
+      page: number, limit: number, search_by_company_name?: string, is_super_user?: boolean, created_at?: Date
+   }) => {
+      // 1. There's a search term (these are unique and rarely repeated)
+      if (query.search_by_company_name?.trim())
+         return (false);
+
+      // 2. Page is beyond first 3 pages (most users only browse first few pages)
+      if (query.page > 3)
+         return (false);
+
+      // 3. Limit is not standard (only cache common page sizes)
+      if (![10, 20, 50].includes(query.limit))
+         return (false);
+
+      // 4. Created_at filter is present (these are usually unique queries)
+      if (query.created_at)
+         return (false);
+
+      // 5. is_super_user filter is present (only cache the default view)
+      if (query.is_super_user !== undefined)
+         return (false);
+
+      return (true);
+   }
+
+   /**
+    * Generates a cache key for user list
+    * Uses a simplified key structure to minimize the number of keys
+    */
+   public generateUserListCacheKey = (query: {
+      page: number,
+      limit: number
+   }) => {
+      return (`users:list:p${query.page}:l${query.limit}`);
+   }
 }
 
 const adminUtilies = new AdminUtilies();
