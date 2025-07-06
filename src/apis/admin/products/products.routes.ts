@@ -49,5 +49,11 @@ AdminProductRoutes.route("/:product_id/")
       adminProductController.DeleteProduct
    )
 
+AdminProductRoutes.route("/:product_id/active/")
+   .patch(
+      productValidator.productParamValidID(), adminProductValidator.activeProductValid(),
+      ApiError.validation_error,
+      adminProductController.ProductActivation
+   )
 
 export default AdminProductRoutes;

@@ -132,6 +132,29 @@ class AdminProductsControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+   public ProductActivation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { active } = req.body;
+      const { product_id } = req.params;
+
+      try {
+         const product = await this.service.getProductByID(product_id);
+
+         if (!product)
+            return (next(ApiError.create_error("Product not Found!", 404)));
+
+         if (product.is_active === active)
+            return (next(ApiError.create_error(`activation is already ${active}`, 400)));
+         
+         await productService.resetProductCache(product_id);
+
+         const updated_product = await this.service.productActivation(product, active);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, `Successfully Updated the activation status!`, { ...updated_product }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const adminProductController = new AdminProductsControllerClass();

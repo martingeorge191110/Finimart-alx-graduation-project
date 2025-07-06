@@ -110,6 +110,18 @@ class AdminProductValidatorClass {
             }
          })
    ])
+
+   public activeProductValid = (): ValidationChain[] => ([
+      body("active")
+         .notEmpty().withMessage("active status is required!")
+         .custom((val, { req }: Meta) => {
+            if (typeof val !== 'boolean')
+               throw (new Error("Active status should be boolean!"))
+
+            return (true);
+         })
+         .isBoolean().withMessage("Active status should be boolean!")
+   ])
 }
 
 const adminProductValidator = new AdminProductValidatorClass();

@@ -182,6 +182,29 @@ class AdminProductServiceClass {
       }
    }
 
+   public productActivation = async (product: Product, active: boolean) => {
+      try {
+         return (await this.configMainDB.product.update({
+            where: { id: product.id },
+            data: { is_active: active }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public getProductByID = async (id: string) => {
+      try {
+         return (await this.configReplicaDB.product.findUnique({
+            where: { id },
+            include: {
+               Product_Specs: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const adminProductService = new AdminProductServiceClass();
