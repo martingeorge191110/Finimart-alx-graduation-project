@@ -155,6 +155,37 @@ class AdminProductsControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+   public updateProductImg = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const file = req.file;
+      const { product_id } = req.params;
+
+      try {
+         if (!file)
+            throw (new Error("No Image Uploaded!"));
+
+         const find_product = await this.service.findProductByID(product_id);
+
+         if (!find_product)
+            return (next(ApiError.create_error("Invalid Product!", 404)));
+
+         const current_img_url = find_product.url_img;
+         const isDeleted = await deleteCloudinaryImage(current_img_url);
+
+         if (!isDeleted)
+            throw (new Error("Failed to remove the image!"));
+
+         const { secure_url } = await uploadImageToCloudinary(file.path);
+
+         const updated_product = await this.service.updateProductImage(find_product.id, secure_url);
+         await productService.resetProductCache(product_id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully Updated the product image!", { ...updated_product }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
 }
 
 const adminProductController = new AdminProductsControllerClass();

@@ -56,4 +56,11 @@ AdminProductRoutes.route("/:product_id/active/")
       adminProductController.ProductActivation
    )
 
+AdminProductRoutes.route("/:product_id/image/")
+   .put(
+      MulterIMGUploader('products').single('img'),
+      productValidator.productParamValidID(), ApiError.validation_error,
+      adminProductController.updateProductImg
+   )
+
 export default AdminProductRoutes;
