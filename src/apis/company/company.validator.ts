@@ -137,6 +137,64 @@ class CompanyValidatorClass {
          .isIn(["Controller", "Sub_Controller", "Order_Maker"]).withMessage("User role must be one of the following: Controller, Sub_Controller, Order_Maker")
    ])
 
+   public validateDeliveryAddress = (): ValidationChain[] => ([
+      body("street_address")
+         .trim().notEmpty().withMessage("Street address is required")
+         .isLength({ min: 5, max: 200 }).withMessage("Street address must be between 5 and 200 characters"),
+      body("city")
+         .trim().notEmpty().withMessage("City is required")
+         .isLength({ min: 2, max: 100 }).withMessage("City must be between 2 and 100 characters"),
+      body("country")
+         .trim().notEmpty().withMessage("Country is required")
+         .isLength({ min: 2, max: 100 }).withMessage("Country must be between 2 and 100 characters"),
+      body("building_no")
+         .optional()
+         .trim().notEmpty().withMessage("Building number is required")
+         .isLength({ min: 1, max: 50 }).withMessage("Building number must be between 1 and 50 characters"),
+      body("state_or_origin")
+         .optional()
+         .trim().notEmpty().withMessage("State or origin is required")
+         .isLength({ min: 2, max: 100 }).withMessage("State or origin must be between 2 and 100 characters"),
+      body("notes")
+         .optional()
+         .trim().notEmpty().withMessage("Notes are required")
+         .isLength({ min: 5, max: 291 }).withMessage("Notes must be between 5 and 291 characters")
+   ])
+
+   public validateAddressID = (): ValidationChain[] => ([
+      param("address_id")
+         .trim().notEmpty().withMessage("Address ID is Required!")
+         .isUUID().withMessage("Not valid Address ID!")
+         .bail()
+         .custom(async (val: string, { req }: Meta) => {
+            try {
+               const address = await this.service.getCompanyAddressByID(val);
+               if (!address)
+                  throw (new Error("Address not found!"));
+
+               (req as any).address = address;
+               return (true);
+            } catch (err) {
+               throw (err);
+            }
+         })
+   ])
+
+   public validateUpdateAddress = (): ValidationChain[] => {
+      const inputs = ["street_address", "city", "country", "building_no", "state_or_origin", "notes"]
+      return ([
+         ...this.validateAddressID(),
+         ...inputs.map(inputs => (
+            body(inputs)
+               .optional()
+               .trim().notEmpty().withMessage(`${inputs.replace(/_/g, " ")} is required`)
+               .isLength({
+                  min: inputs === "street_address" ? 5 : 2,
+                  max: inputs === "street_address" ? 200 : 100
+               }).withMessage(`${inputs.replace(/_/g, " ")} must be between ${inputs === "street_address" ? 5 : 2} and ${inputs === "street_address" ? 200 : 100} characters`)
+         )),
+      ])
+   }
 }
 
 const companyValidator = new CompanyValidatorClass(companyService);

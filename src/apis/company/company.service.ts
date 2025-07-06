@@ -257,6 +257,107 @@ class CompanyServiceClass {
          throw (err);
       }
    }
+
+   public getCompanyAddresses = async (company_id: string) => {
+      try {
+         const [addresses, total_addresses] = await Promise.all([
+            this.configReplicaDB.company_Address.findMany({
+               where: { company_id },
+               select: {
+                  id: true, street_address: true, city: true, country: true, building_no: true
+               }
+            }),
+            this.configReplicaDB.company_Address.count({ where: { company_id } })
+         ]);
+
+         return ({ addresses, total_addresses });
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   /* Adding Delivery address */
+   public addDeliveryAddress = async (addressData: {
+      street_address: string, city: string, country: string,
+      building_no?: string, state_or_origin?: string, notes?: string, company_id: string
+   }) => {
+      try {
+         const { street_address, city, country, building_no, state_or_origin, notes, company_id } = addressData;
+
+         return (await this.configMainDB.company_Address.create({
+            data: {
+               street_address, city, country, building_no,
+               state_or_origin, notes, company_id
+            },
+            select: {
+               id: true, street_address: true, city: true,
+               country: true, building_no: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+   /* End of Adding Delivery address */
+
+   /* Update and Delete company addresses by id APIs */
+   public getCompanyAddressByID = async (address_id: string) => {
+      try {
+         return (await this.configMainDB.company_Address.findUnique({
+            where: { id: address_id },
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public deleteDeliveryAddressByID = async (address_id: string, company_id: string) => {
+      try {
+         await this.configMainDB.company_Address.delete({
+            where: { company_id, id: address_id }
+         })
+      } catch (err) {
+         throw (err);
+      }
+   }
+   /* End of Update and Delete company addresses by id APIs */
+
+   public updateDeliveryAddress = async (address_id: string, company_id: string, addressData: {
+      street_address: string, city: string, country: string,
+      building_no?: string, state_or_origin?: string, notes?: string
+   }) => {
+      try {
+         const { street_address, city, country, building_no, state_or_origin, notes } = addressData;
+
+         return (await this.configMainDB.company_Address.update({
+            where: { id: address_id, company_id },
+            data: {
+               street_address, city, country, building_no,
+               state_or_origin, notes
+            },
+            select: {
+               id: true, street_address: true, city: true,
+               country: true, building_no: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   
+   public getCompanyWallet = async (company_id: string) => {
+      try {
+         return (await this.configReplicaDB.e_Wallet.findUnique({
+            where: { company_id },
+            select: {
+               id: true, balance: true, created_at: true, updated_at: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const companyService = new CompanyServiceClass();

@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from "express";
 import {companyService} from "./company.service";
 import ApiError from "../../middlewares/error.handler";
-import { Company, User, UserRole } from "../../../generated/prisma";
+import { Company, Company_Address, User, UserRole } from "../../../generated/prisma";
 import globalUtils from "../../utilies/globals";
 import { JWT_PAYLOAD } from "../../types/express";
 
@@ -154,6 +154,92 @@ class CompanyControllerClass {
          }));
       } catch (err) {
          return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public GetCompanyAddresses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const company: Company = (req as any).company;
+
+      try {
+         const { addresses, total_addresses } = await this.service.getCompanyAddresses(company.id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfuly retreived the company addresses!", {
+            addresses,
+            total_addresses
+         }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public AddDeliveryAddress = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const company: Company = (req as any).company;
+      const {
+         street_address, city, country, building_no, state_or_origin, notes
+      } = req.body;
+
+      try {
+         const address = await this.service.addDeliveryAddress({
+            street_address, city, country, building_no, state_or_origin, notes, company_id: company.id
+         });
+
+         return (globalUtils.SuccessfulyResponseJson(res, 201, "Delivery address added successfully!", {
+            ...address
+         }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public DeleteDeliveryAddress = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { address_id } = req.params;
+      const company: Company = (req as any).company;
+      try {
+         await this.service.deleteDeliveryAddressByID(address_id, company.id);
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Delivery address deleted successfully!"));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public UpdateAddress = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const address: Company_Address = (req as any).address;
+      const payload: JWT_PAYLOAD = (req as any).payload;
+      const company: Company = (req as any).company;
+      const {
+         street_address, city, country, building_no, state_or_origin, notes
+      } = req.body;
+      if (address.company_id !== company.id)
+         return (next(ApiError.create_error("You can not update this address!", 403)));
+
+      try {
+         const updatedAddress = await this.service.updateDeliveryAddress(
+            address.id, payload.company_id,
+            { street_address, city, country, building_no, state_or_origin, notes}
+         );
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Delivery address updated successfully!", {
+            ...updatedAddress
+         }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public GetProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const payload: JWT_PAYLOAD = (req as any).payload;
+      const company: Company = (req as any).company;
+
+      try {
+         const [user, wallet] = await Promise.all([
+            this.service.getUserByID(payload.user_id),
+            this.service.getCompanyWallet(company.id)
+         ])
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfuly retreived the company profile!", {
+            company, user, wallet
+         }));
+      } catch (err) {
+         return next(ApiError.create_error(String(err), 500));
       }
    }
 }
