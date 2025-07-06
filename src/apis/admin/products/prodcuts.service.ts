@@ -217,6 +217,57 @@ class AdminProductServiceClass {
          throw (err);
       }
    }
+
+   public getVariantByID = async (variant_id: string) => {
+      try {
+         return (await this.configMainDB.product_Variant.findUnique({
+            where: { id: variant_id },
+            select: {
+               id: true, size: true, price: true, quantity: true, created_at: true, updated_at: true,
+               Product: {
+                  select: { id: true, is_active: true }
+               },
+               _count: {
+                  select: { Product_Order_items: true }
+               }
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public updateProductVariant = async (variant_id: string, size?: string, price?: number, quantity?: number) => {
+      try {
+         const updateData: any = {};
+
+         if (typeof size !== "undefined") updateData.size = size;
+         if (typeof price !== "undefined") updateData.price = price;
+         if (typeof quantity !== "undefined") updateData.quantity = quantity;
+
+         // Prevent updating with empty data
+         if (Object.keys(updateData).length === 0) {
+            throw new Error("No valid fields provided to update.");
+         }
+
+         return (await this.configMainDB.product_Variant.update({
+            where: { id: variant_id },
+            data: updateData
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public deleteProductVariant = async (variant_id: string) => {
+      try {
+         await this.configMainDB.product_Variant.delete({
+            where: { id: variant_id }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const adminProductService = new AdminProductServiceClass();

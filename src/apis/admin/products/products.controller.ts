@@ -209,6 +209,57 @@ class AdminProductsControllerClass {
       }
    }
 
+   public DeleteProductVariant = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { product_id, variant_id } = req.params;
+      
+      try {
+         const [product, variant] = await Promise.all([
+            this.service.getProductByID(product_id),
+            this.service.getVariantByID(variant_id)
+         ]);
+
+         if (!product)
+            return (next(ApiError.create_error("Product not Found!", 404)));
+
+         if (product.is_active)
+            return (next(ApiError.create_error("You cannot Remove any variatns, you should change the product activation first!", 400)));
+
+         if (!variant)
+            return (next(ApiError.create_error("Product Variant not Found!", 404)));
+         await productService.resetProductCache(product_id);
+
+         await this.service.deleteProductVariant(variant_id);
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully removed this Variant!"))
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public UpdateProductVariant = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { product_id, variant_id } = req.params;
+      const { size, price, quantity } = req.body;
+
+      try {
+         const find_product = await this.service.findProductByID(product_id);
+         if (!find_product)
+            return (next(ApiError.create_error("In valid Product!", 404)));
+
+         const find_variant = await this.service.getVariantByID(variant_id);
+         if (!find_variant)
+            return (next(ApiError.create_error("In valid Variant!", 404)));
+
+         if (quantity > find_product.quantity)
+            return (next(ApiError.create_error("In valid Product Variant Quantity!", 400)));
+         await productService.resetProductCache(product_id);
+
+         const updated_variant = await this.service.updateProductVariant(find_variant.id, size, price, quantity);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully Updated the variant!", { ...updated_variant }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
 }
 
 const adminProductController = new AdminProductsControllerClass();

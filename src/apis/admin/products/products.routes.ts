@@ -70,4 +70,17 @@ AdminProductRoutes.route("/:product_id/variants/")
       adminProductController.addProductVaraint
    )
 
+
+AdminProductRoutes.route("/:product_id/variants/:variant_id/")
+   .delete(
+      adminProductValidator.productAndVariantIDsValid(), ApiError.validation_error,
+      adminProductController.DeleteProductVariant
+   )
+
+   .put(
+      productValidator.productParamValidID(), adminProductValidator.updateProductVariantValid(),
+      ApiError.validation_error,
+      adminProductController.UpdateProductVariant
+   )
+
 export default AdminProductRoutes;

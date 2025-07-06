@@ -133,6 +133,19 @@ class AdminProductValidatorClass {
          .toInt()
          .isInt().withMessage("Invalid quantity input!")
    ])
+
+   public updateProductVariantValid = (): ValidationChain[] => ([
+      body("size")
+         .optional()
+         .trim().notEmpty().withMessage("Size is Required!")
+         .isLength({ max: 10 }).withMessage("Invalid size input!"),
+      body("price")
+         .optional()
+         .isNumeric().withMessage("Invalid Price input!"),
+      body("quantity")
+         .optional()
+         .isInt().withMessage("Invalid quantity input!")
+   ])
 }
 
 const adminProductValidator = new AdminProductValidatorClass();
