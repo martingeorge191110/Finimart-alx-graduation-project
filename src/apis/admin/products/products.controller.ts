@@ -301,6 +301,89 @@ class AdminProductsControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+
+   public AddNewProductSpecsValue = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { product_id, specs_id } = req.params;
+      const { value } = req.body;
+
+      try {
+         const [product, specsDefination] = await Promise.all([
+            this.service.getProductByID(product_id),
+            this.service.getSpecsDefByID(specs_id)
+         ]);
+
+         if (!product)
+            return (next(ApiError.create_error("Product not Found!", 404)));
+
+         if (!specsDefination)
+            return (next(ApiError.create_error("Specs definition not Found!", 404)));
+         await productService.resetProductCache(product_id);
+
+         const specsValue = await this.service.createSpecsValie(product, specsDefination, value);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 201, "New Specs value added to the product!", { ...specsValue }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public DeleteSPecsValue = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { product_id, specs_id } = req.params;
+
+      try {
+         const [product, specsDefination] = await Promise.all([
+            this.service.getProductByID(product_id),
+            this.service.getSpecsDefByID(specs_id)
+         ]);
+
+         if (!product)
+            return (next(ApiError.create_error("Product not Found!", 404)));
+
+         if (!specsDefination)
+            return (next(ApiError.create_error("Specs definition not Found!", 404)));
+         await productService.resetProductCache(product_id);
+
+         const hasSpecs = product.Product_Specs.some(spec => spec.specs_id === specs_id);
+         if (!hasSpecs)
+            return (next(ApiError.create_error("Product does not have this spec!", 400)));
+
+         await this.service.deleteProductSpecsVal(product.id, specsDefination);
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully removed this specs value!"))
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public UpdateProductSpecs = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { product_id, specs_id } = req.params;
+      const { value } = req.body;
+
+      try {
+         const [product, specsDefination] = await Promise.all([
+            this.service.getProductByID(product_id),
+            this.service.getSpecsDefByID(specs_id)
+         ]);
+
+         if (!product)
+            return (next(ApiError.create_error("Product not Found!", 404)));
+
+         if (!specsDefination)
+            return (next(ApiError.create_error("Specs definition not Found!", 404)));
+
+         const hasSpecs = product.Product_Specs.some(spec => spec.specs_id === specs_id);
+         if (!hasSpecs)
+            return (next(ApiError.create_error("Product does not have this spec!", 400)));
+         await productService.resetProductCache(product_id);
+
+         const updated_product = await this.service.updateProductSpecsValue(product.id, specsDefination, value);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully Updated the specs value", { ...updated_product }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
 }
 
 const adminProductController = new AdminProductsControllerClass();

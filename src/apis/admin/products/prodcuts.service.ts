@@ -288,6 +288,81 @@ class AdminProductServiceClass {
          throw (err);
       }
    }
+
+   public getSpecsDefByID = async (id: string) => {
+      try {
+         return (await this.configReplicaDB.specs_Defination.findUnique({
+            where: { id }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+
+   public createSpecsValie = async (product: Product, specs_Defination: Specs_Defination, value: string) => {
+      try {
+         return (await this.configMainDB.product.update({
+            where: { id: product.id },
+            data: {
+               Product_Specs: {
+                  create: {
+                     specs_id: specs_Defination.id,
+                     value
+                  }
+               }
+            },
+            include: {
+               Product_Specs: {
+                  include: {
+                     Specs_Defination: true
+                  }
+               }
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public deleteProductSpecsVal = async (product_id: string, specs: Specs_Defination) => {
+      try {
+         await this.configMainDB.product_Specs.delete({
+            where: {
+               specs_id_product_id: {
+                  product_id, specs_id: specs.id
+               }
+            }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public updateProductSpecsValue = async (product_id: string, specs: Specs_Defination, value: string) => {
+      try {
+         const transaction = await this.configMainDB.$transaction( async (tx) => {
+            const updated_specs = await tx.product_Specs.update({
+               where: {
+                  specs_id_product_id: {
+                     product_id, specs_id: specs.id
+                  }
+               }, data: { value }
+            });
+
+            const updated_product = await tx.product.findUnique({
+               where: { id: product_id },
+               include: { Product_Specs: true }
+            });
+
+            return (updated_product);
+         });
+
+         return (transaction);
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const adminProductService = new AdminProductServiceClass();

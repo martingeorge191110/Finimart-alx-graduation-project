@@ -97,4 +97,18 @@ AdminProductRoutes.route("/:product_id/add-category/")
       adminProductController.addCategoryToProduct
    )
 
+AdminProductRoutes.route("/:product_id/specs/:specs_id/")
+   .post(
+      adminProductValidator.addOrUpdateSpecsValueValid(), ApiError.validation_error,
+      adminProductController.AddNewProductSpecsValue
+   )
+   .delete(
+      adminProductValidator.specsAndProductIDValid(), ApiError.validation_error,
+      adminProductController.DeleteSPecsValue
+   )
+   .put(
+      adminProductValidator.addOrUpdateSpecsValueValid(), ApiError.validation_error,
+      adminProductController.UpdateProductSpecs
+   )
+
 export default AdminProductRoutes;

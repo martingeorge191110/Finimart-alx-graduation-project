@@ -167,6 +167,26 @@ class AdminProductValidatorClass {
             }
          })
    ])
+
+   public specsAndProductIDValid = (): ValidationChain[] => ([
+      param("product_id")
+         .trim().notEmpty().withMessage("Product ID is required!")
+         .isUUID().withMessage("Invalid Product ID!")
+         .isLength({ min: 5, max: 55 }).withMessage("Invalid Product ID!"),
+      param("specs_id")
+         .trim().notEmpty().withMessage("Specs ID is required!")
+         .isUUID().withMessage("Invalid Specs ID!")
+         .isLength({ min: 5, max: 55 }).withMessage("Invalid Specs ID!")
+   ])
+
+   public addOrUpdateSpecsValueValid = (): ValidationChain[] => ([
+      ...this.specsAndProductIDValid(),
+      body("value")
+         .trim().notEmpty().withMessage("Specs value is required!")
+         .isString().withMessage("Specs value must be string!")
+         .isLength({ min: 1, max: 15 }).withMessage("Invalid Specs value!"),
+   ])
+
 }
 
 const adminProductValidator = new AdminProductValidatorClass();
