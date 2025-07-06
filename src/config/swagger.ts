@@ -7,9 +7,9 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "MWASFAA API Documentation",
+      title: "Finimart-alx-graduation-project API Documentation",
       version: "1.0.0",
-      description: "API documentation for MWASFAA application",
+      description: "API documentation for Finimart-alx-graduation-project application",
       contact: {
         name: "API Support",
       },
