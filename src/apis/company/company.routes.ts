@@ -20,7 +20,8 @@ const {
    validateOrdersList,
    validateCreateUser, validateUserID,
    validateUserRole, validateDeliveryAddress,
-   validateAddressID, validateUpdateAddress
+   validateAddressID, validateUpdateAddress,
+   validateUpdateProfile
 } = companyValidator;
 
 const {
@@ -29,7 +30,7 @@ const {
    GetCompanyUsers, CreateUser, DeleteUser,
    UpdateUserRole, GetCompanyAddresses,
    AddDeliveryAddress, DeleteDeliveryAddress,
-   UpdateAddress, GetProfile
+   UpdateAddress, GetProfile, UpdateProfile
 } = companyController;
 
 CompanyRoutes.use(
@@ -522,10 +523,50 @@ CompanyRoutes.route("/delivery_addresses/:address_id/")
  *                           format: date-time
  *       500:
  *         description: Server error
+ *   put:
+ *     summary: Update user profile
+ *     description: Update the current user's profile information (first name, last name, phone number).
+ *     tags: [Company]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - first_name
+ *               - last_name
+ *             properties:
+ *               first_name:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 50
+ *                 description: User's first name
+ *               last_name:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 50
+ *                 description: User's last name
+ *               phone_number:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 15
+ *                 description: Egyptian phone number (optional, must be unique)
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Validation error
+ *       500:
+ *         description: Server error
  */
 CompanyRoutes.route("/profile/")
    .get(
       GetProfile
+   )
+   .put(
+      validateUpdateProfile(), ApiError.validation_error,
+      UpdateProfile
    )
 
 export default CompanyRoutes;

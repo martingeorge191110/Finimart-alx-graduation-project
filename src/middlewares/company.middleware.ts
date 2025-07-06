@@ -74,6 +74,16 @@ class CompanyMiddlewares {
 
       return (next());
    }
+
+   
+   public isUserController = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const payload: JWT_PAYLOAD = (req as any).payload;
+
+      if (payload.user_role !== 'Controller' && !payload.is_super_user)
+         return (next(ApiError.create_error("Forbidden: You are not a user controller", 403)));
+
+      return (next());
+   }
 }
 
 export default CompanyMiddlewares;

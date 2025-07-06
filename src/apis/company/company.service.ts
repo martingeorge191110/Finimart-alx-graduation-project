@@ -358,6 +358,25 @@ class CompanyServiceClass {
          throw (err);
       }
    }
+
+   public updateUserProfile = async (user_id: string, company_id: string, profileData: {
+      first_name: string, last_name: string, phone_number: string
+   }) => {
+      try {
+         const { first_name, last_name, phone_number } = profileData;
+
+         return (await this.configMainDB.user.update({
+            where: { id: user_id, company_id },
+            data: { first_name, last_name, phone_number },
+            select: {
+               id: true, first_name: true, last_name: true, email: true,
+               phone_number: true, is_super_user: true, user_role: true, is_blocked: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const companyService = new CompanyServiceClass();

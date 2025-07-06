@@ -242,6 +242,24 @@ class CompanyControllerClass {
          return next(ApiError.create_error(String(err), 500));
       }
    }
+
+   public UpdateProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const payload: JWT_PAYLOAD = (req as any).payload;
+      const company: Company = (req as any).company;
+      const { first_name, last_name, phone_number } = req.body;
+
+      try {
+         const updatedUser = await this.service.updateUserProfile(
+            payload.user_id, company.id, { first_name, last_name, phone_number }
+         )
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Profile updated successfully!", {
+            ...updatedUser
+         }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const companyController = new CompanyControllerClass();

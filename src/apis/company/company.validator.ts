@@ -195,6 +195,32 @@ class CompanyValidatorClass {
          )),
       ])
    }
+
+   public validateUpdateProfile = (): ValidationChain[] => ([
+      body('first_name')
+         .trim().notEmpty().withMessage("First name is required")
+         .isLength({ min: 3, max: 50 }).withMessage("First name must be between 3 and 50 characters"),
+      body('last_name')
+         .trim().notEmpty().withMessage("Last name is required")
+         .isLength({ min: 3, max: 50 }).withMessage("Last name must be between 3 and 50 characters"),
+      body('phone_number')
+         .optional()
+         .trim().notEmpty().withMessage("Phone number is required")
+         .isMobilePhone("ar-EG").withMessage("Phone number is invalid")
+         .isLength({ min: 10, max: 15 }).withMessage("Phone number must be between 10 and 15 characters")
+         .bail()
+         .custom(async (val: string, { req }: Meta): Promise<void | boolean> => {
+            try {
+               const user = await this.service.getUserByPhoneNumber(val);
+               if (user)
+                  throw (new Error("Invalid phone number!"));
+
+               return (true);
+            } catch (err) {
+               throw (err);
+            }
+         })
+   ])
 }
 
 const companyValidator = new CompanyValidatorClass(companyService);
