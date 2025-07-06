@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { body, Meta, ValidationChain, param } from "express-validator";
 import adminBrandsService from "./brands.services";
 

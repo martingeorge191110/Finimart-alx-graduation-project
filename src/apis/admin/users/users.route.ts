@@ -17,5 +17,22 @@ AdminUsersRouter.route("/")
       AdminUsersController.GetUsersPagination
    )
 
+AdminUsersRouter.route('/:user_id/')
+   .delete(
+      AdminUsersValidator.userIDParamValid(), ApiError.validation_error,
+      AdminUsersController.DeleteUser
+   )
+
+AdminUsersRouter.route('/:user_id/')
+   .put(
+      AdminUsersValidator.userIDParamValid(), AdminUsersValidator.updateUserValid(),
+      ApiError.validation_error, AdminUsersController.UpdateUserInfoByID
+   )
+
+AdminUsersRouter.route('/:user_id/block/')
+   .patch(
+      AdminUsersValidator.userIDParamValid(), ApiError.validation_error,
+      AdminUsersController.blockUser
+   )
 
 export default AdminUsersRouter;

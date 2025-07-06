@@ -1,8 +1,12 @@
 #!/usr/bin/env node
+
 import { NextFunction, Request, Response } from "express";
 import AdminUsersService from "./users.service";
 import ApiError from "../../../middlewares/error.handler";
 import globalUtils from "../../../utilies/globals";
+import adminUtilies from "../admin.utilies";
+import { User } from "../../../../generated/prisma";
+import { promises } from "nodemailer/lib/xoauth2";
 
 
 
@@ -47,6 +51,45 @@ class AdminUsersControllerClass {
          return (globalUtils.SuccessfulyResponseJson(res, 200, "Users fetched successfully!", {
             users, total_users, total_pages, has_next_page, has_previous_page
          }))
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public DeleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const user: User = (req as any).user;
+
+      try {
+         await this.service.deleteUserByID(user.id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "User deleted successfully!"));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public blockUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { user_id } = req.params;
+      const { block } = req.body;
+
+      try {
+         await this.service.blockUserbyId(user_id, Boolean(block));
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "User blocked successfully!"))
+
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public UpdateUserInfoByID = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { user_id } = req.params;
+      const { first_name, last_name, email, phone_number, is_super_user, user_role } = req.body;
+
+      try {
+         await this.service.updateUserInfo(user_id, first_name, last_name, email, phone_number, is_super_user, user_role);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "User Updated successfully!"))
       } catch (err) {
          return (next(ApiError.create_error(String(err), 500)));
       }

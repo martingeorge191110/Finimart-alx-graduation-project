@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Router } from "express";
-import { isAdminAccount, verifyAdminToken } from "../../../middlewares/verify.admin.token";
+import { isAdminAccount, verifyAdminToken } from "../../../middlewares/admin.middlewares";
 import adminDashboardController from "./dashboard.controller";
 
 

@@ -19,6 +19,53 @@ class AdminCompanyServiceClass {
       this.configRedis = redis;
    }
 
+
+   public updateCompanyData = async (company_id: string, data: any) => {
+      try {
+         return (await (this.configMainDB.company.update({
+            where: { id: company_id },
+            data: {
+               ...data
+            }
+         })));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public deleteCompanyByID = async (company_id: string): Promise<void> => {
+      try {
+         // Optional: Delete related data first if constraints exist (e.g., E_Wallet, Users, etc.)
+         await this.configMainDB.company.delete({
+            where: { id: company_id },
+         });
+
+         // Optionally remove from Redis too
+         const redisKey = `company:${company_id}`;
+         await this.configRedis.del(redisKey);
+      } catch (err) {
+         throw err;
+      }
+   };
+
+   public updateCompanyInRedis = async (company_data: Company) => {
+      try {
+         const companyKey = `company:${company_data.id}`;
+         const exists = await this.configRedis.exists(companyKey);
+
+         if (exists) {
+            // Update the company data in Redis with 1 hour expiration
+            await this.configRedis.setEx(companyKey, 3600, JSON.stringify(company_data));
+            return (true);
+         }
+
+         return (false);
+      } catch (error) {
+         console.error(`Error updating company in Redis: ${error}`);
+         throw (error);
+      }
+   };
+
    public getCompaniesFiltered = async (
       page: number = 1, limit: number = 20, sort_by: string = "created_at",
       filteration: AdminCompanyFilteration
@@ -92,51 +139,9 @@ class AdminCompanyServiceClass {
       }
    }
 
-
-   public updateCompanyData = async (company_id: string, data: any) => {
-      try {
-         return (await (this.configMainDB.company.update({
-            where: { id: company_id },
-            data: {
-               ...data
-            }
-         })));
-      } catch (err) {
-         throw (err);
-      }
+   public getCompanyByName = async (name: string): Promise<Company | null> => {
+      return await this.configMainDB.company.findUnique({ where: { name: name } });
    }
-
-   public updateCompanyData = async (company_id: string, data: any) => {
-      try {
-         return (await (this.configMainDB.company.update({
-            where: { id: company_id },
-            data: {
-               ...data
-            }
-         })));
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public updateCompanyInRedis = async (company_data: Company) => {
-      try {
-         const companyKey = `company:${company_data.id}`;
-         const exists = await this.configRedis.exists(companyKey);
-
-         if (exists) {
-            // Update the company data in Redis with 1 hour expiration
-            await this.configRedis.setEx(companyKey, 3600, JSON.stringify(company_data));
-            return (true);
-         }
-
-         return (false);
-      } catch (error) {
-         console.error(`Error updating company in Redis: ${error}`);
-         throw (error);
-      }
-   };
-
 
    public updateCompanyWallet = async (company_id: string, amount: number, type: "add" | "subtract") => {
       try {

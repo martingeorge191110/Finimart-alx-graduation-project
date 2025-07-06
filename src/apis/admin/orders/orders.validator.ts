@@ -32,14 +32,12 @@ class AdminOrdersValidatorClass {
          .isIn(['Pending', 'Confirmed', 'Cancelled', 'Returned']).withMessage("Invalid Status option!")
    ])
 
-
    public orderIDValid = (): ValidationChain[] => ([
       param("order_id")
          .trim().notEmpty().withMessage("Order ID is required!")
          .isUUID().withMessage("Order ID must be a valid UUID!")
          .isLength({min: 5, max: 50}).withMessage("Order ID must be exactly 50 characters long!"),
    ])
-
 
    public updateOrderStatusAndPaymentValid = (): ValidationChain[] => ([
       ...this.orderIDValid(),

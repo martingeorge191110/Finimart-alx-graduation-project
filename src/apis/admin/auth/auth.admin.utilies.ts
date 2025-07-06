@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { Response } from "express";
 // import { JWT_PAYLOAD } from "../../types/express";
 import jwt from 'jsonwebtoken';

@@ -13,20 +13,50 @@ import AdminAuthService from "./auth.admin.service";
  * @class AdminAuthValidatorClass
  */
 class AdminAuthValidatorClass {
-
+   /**
+    * The authentication service instance used for database operations
+    * @private
+    * @type {typeof authService}
+    */
    private service;
 
+   /**
+    * Creates an instance of AdminAuthValidatorClass
+    * Initializes the service property with the authService dependency
+    *
+    * @constructor
+    */
    constructor() {
       this.service = AdminAuthService;
    }
 
    /**
+    * Creates validation chains for admin login credentials
+    *
+    * Validates both email and password fields with the following rules:
+    * - Email: Required, valid email format, 10-55 characters, must exist in database
+    * - Password: Required, 10-55 characters
+    *
     * @public
     * @method loginValid
     * @returns {ValidationChain[]} Array of validation chains for email and password
     *    *
     * @throws {Error} Throws "Wrong email or password!" if admin email not found
     * @throws {Error} Re-throws any database errors encountered during validation
+    *
+    * @description
+    * Email validation includes:
+    * - Trims whitespace
+    * - Checks if field is not empty
+    * - Validates email format using built-in validator
+    * - Ensures length is between 10-55 characters
+    * - Custom validation that queries database to verify admin exists
+    * - Sets status_code to 404 and attaches admin object to request if found
+    *
+    * Password validation includes:
+    * - Trims whitespace
+    * - Checks if field is not empty
+    * - Ensures length is between 10-55 characters
     */
    public loginValid = (): ValidationChain[] => {
       return [
@@ -62,5 +92,14 @@ class AdminAuthValidatorClass {
    ];
 }
 
+/**
+ * Default export instance of AdminAuthValidatorClass
+ *
+ * Pre-instantiated validator object ready for use in route definitions.
+ * This singleton pattern ensures consistent validation behavior across the application.
+ *
+ * @constant AdminAuthValidator
+ * @type {AdminAuthValidatorClass}
+ * */
 const AdminAuthValidator = new AdminAuthValidatorClass();
 export default AdminAuthValidator;

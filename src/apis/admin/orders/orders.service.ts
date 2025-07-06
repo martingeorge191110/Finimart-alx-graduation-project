@@ -130,6 +130,7 @@ class AdminOrdersServiceClass {
          throw (err);
       }
    }
+
 }
 
 const adminOrderService = AdminOrdersServiceClass.createInstance();
