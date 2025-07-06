@@ -111,6 +111,32 @@ class CompanyValidatorClass {
          .isIn(["Controller", "Sub_Controller", "Order_Maker"]).withMessage("Role must be one of the following: Controller, Sub_Controller, Order_Maker")
    ])
 
+   public validateUserID = (): ValidationChain[] => ([
+      param("user_id")
+         .trim().notEmpty().withMessage("User ID is Required!")
+         .isUUID().withMessage("Not valid User ID!")
+         .bail()
+         .custom(async (val: string, { req }: Meta) => {
+            try {
+               const user = await this.service.getUserByID(val);
+               if (!user)
+                  throw (new Error("User not found!"));
+
+               (req as any).user = user;
+               return (true);
+            } catch (err) {
+               throw (err);
+            }
+         })
+   ])
+
+   public validateUserRole = (): ValidationChain[] => ([
+      ...this.validateUserID(),
+      body("user_role")
+         .trim().notEmpty().withMessage("User role is required")
+         .isIn(["Controller", "Sub_Controller", "Order_Maker"]).withMessage("User role must be one of the following: Controller, Sub_Controller, Order_Maker")
+   ])
+
 }
 
 const companyValidator = new CompanyValidatorClass(companyService);

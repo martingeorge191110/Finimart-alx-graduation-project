@@ -2,8 +2,9 @@
 import { NextFunction, Request, Response } from "express";
 import {companyService} from "./company.service";
 import ApiError from "../../middlewares/error.handler";
-import { Company } from "../../../generated/prisma";
+import { Company, User, UserRole } from "../../../generated/prisma";
 import globalUtils from "../../utilies/globals";
+import { JWT_PAYLOAD } from "../../types/express";
 
 
 
@@ -122,6 +123,39 @@ class CompanyControllerClass {
       }
    }
 
+   public DeleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const user: User = (req as any).user;
+      const company: Company = (req as any).company;
+
+      try {
+         await this.service.deleteUserByID(user.id, company.id);
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "User deleted successfully!"));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   
+   public UpdateUserRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const payload: JWT_PAYLOAD = (req as any).payload;
+      const company: Company = (req as any).company;
+      const user: User = (req as any).user;
+      const { user_role } = req.body;
+      const user_role_value: UserRole = user_role as UserRole;
+
+      if (user.id === payload.user_id)
+         return (next(ApiError.create_error("You can not change your own role!", 403)));
+
+      try {
+         const updatedUser = await this.service.updateUserRole(user.id, company.id, user_role_value);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "User role updated successfully!", {
+            ...updatedUser
+         }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const companyController = new CompanyControllerClass();

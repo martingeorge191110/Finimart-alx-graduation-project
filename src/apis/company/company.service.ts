@@ -159,63 +159,104 @@ class CompanyServiceClass {
       }
    }
 
-      /* Create User API */
-      public getUserByEmail = async (email: string) => {
-         try {
-            return (await this.configMainDB.user.findUnique({
-               where: { email }
-            }));
-         } catch (err) {
-            throw (err);
-         }
+   /* Create User API */
+   public getUserByEmail = async (email: string) => {
+      try {
+         return (await this.configMainDB.user.findUnique({
+            where: { email }
+         }));
+      } catch (err) {
+         throw (err);
       }
-   
-      public getUserByPhoneNumber = async (phone_number: string) => {
-         try {
-            return (await this.configMainDB.user.findUnique({
-               where: { phone_number }
-            }));
-         } catch (err) {
-            throw (err);
-         }
+   }
+
+   public getUserByPhoneNumber = async (phone_number: string) => {
+      try {
+         return (await this.configMainDB.user.findUnique({
+            where: { phone_number }
+         }));
+      } catch (err) {
+         throw (err);
       }
-   
-      public getCompanyUsersCount = async (company_id: string) => {
-         try {
-            return (await this.configMainDB.user.count({
-               where: { company_id }
-            }));
-         } catch (err) {
-            throw (err);
-         }
+   }
+
+   public getCompanyUsersCount = async (company_id: string) => {
+      try {
+         return (await this.configMainDB.user.count({
+            where: { company_id }
+         }));
+      } catch (err) {
+         throw (err);
       }
-   
-      public createUser = async (userData: {
-         first_name: string, last_name: string, email: string, password: string,
-         phone_number: string, user_role: (
-            "Controller" | "Sub_Controller" | "Order_Maker"
-         ), company_id: string
-      }) => {
-         try {
-            const { first_name, last_name, email, password, phone_number, user_role, company_id } = userData;
-            const password_hash = await bcrypt.hash(password, 12);
-   
-            return (await this.configMainDB.user.create({
-               data: {
-                  first_name, last_name, email, password_hash,
-                  phone_number, user_role, company_id
-               },
-               select: {
-                  id: true, first_name: true, last_name: true, email: true,
-                  phone_number: true, is_super_user: true, user_role: true,
-                  created_at: true
-               }
-            }));
-         } catch (err) {
-            throw (err);
-         }
+   }
+
+   public createUser = async (userData: {
+      first_name: string, last_name: string, email: string, password: string,
+      phone_number: string, user_role: (
+         "Controller" | "Sub_Controller" | "Order_Maker"
+      ), company_id: string
+   }) => {
+      try {
+         const { first_name, last_name, email, password, phone_number, user_role, company_id } = userData;
+         const password_hash = await bcrypt.hash(password, 12);
+
+         return (await this.configMainDB.user.create({
+            data: {
+               first_name, last_name, email, password_hash,
+               phone_number, user_role, company_id
+            },
+            select: {
+               id: true, first_name: true, last_name: true, email: true,
+               phone_number: true, is_super_user: true, user_role: true,
+               created_at: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
       }
-      /* End of Create user API */
+   }
+   /* End of Create user API */
+
+   public getUserByID = async (user_id: string) => {
+      try {
+         return (await this.configReplicaDB.user.findUnique({
+            where: { id: user_id },
+            select: {
+               id: true, first_name: true, last_name: true, email: true,
+               phone_number: true, is_super_user: true, user_role: true, is_blocked: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   /* Delete User API */
+   public deleteUserByID = async (user_id: string, company_id: string) => {
+      try {
+         await this.configMainDB.user.delete({
+            where: { id: user_id, company_id }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
+   /* End of delete user API */
+
+   public updateUserRole = async (user_id: string, company_id: string, user_role: "Controller" | "Sub_Controller" | "Order_Maker") => {
+      try {
+         return (await this.configMainDB.user.update({
+            where: { id: user_id, company_id },
+            data: { user_role },
+            select: {
+               id: true, first_name: true, last_name: true, email: true,
+               phone_number: true, is_super_user: true, user_role: true, is_blocked: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const companyService = new CompanyServiceClass();

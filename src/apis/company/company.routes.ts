@@ -12,19 +12,21 @@ const CompanyRoutes: Router = Router();
 const {
    isComapnyExists,
    isCompanyValid,
-   isSuperUser,
+   isSuperUser, isUserController
 } = CompanyMiddlewares.getInstance();
 
 const {
    companyParamIDValidDB,
    validateOrdersList,
-   validateCreateUser
+   validateCreateUser, validateUserID,
+   validateUserRole
 } = companyValidator;
 
 const {
    Dashboard,
    GetPendingOrders, GetOrdersHistory,
-   GetCompanyUsers, CreateUser
+   GetCompanyUsers, CreateUser, DeleteUser,
+   UpdateUserRole
 } = companyController;
 
 CompanyRoutes.use(
@@ -233,6 +235,18 @@ CompanyRoutes.route("/users/")
       isSuperUser,
       validateCreateUser(), ApiError.validation_error,
       CreateUser
+   )
+
+
+CompanyRoutes.route("/users/:user_id/")
+   .all( isUserController )
+   .delete(
+      validateUserID(), ApiError.validation_error,
+      DeleteUser
+   )
+   .patch(
+      validateUserRole(), ApiError.validation_error,
+      UpdateUserRole
    )
 
 export default CompanyRoutes;
