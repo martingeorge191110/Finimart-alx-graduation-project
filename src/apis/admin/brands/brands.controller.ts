@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from "express";
 import adminBrandsService from "./brands.services";
 import ApiError from "../../../middlewares/error.handler";
-import globalUtils from "../../../utilies/globals";
+import globalUtils from "../../../utils/globals";
 
 
 

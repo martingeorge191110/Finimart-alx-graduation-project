@@ -37,43 +37,6 @@ class AdminProductsControllerClass {
       }
    };
 
-   public GetProductsPagination = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-      const { page, limit, search_by_code, is_active } = req.query;
-      const pageNumber = Number(page) || 1;
-      const limitNumber = Number(limit) || 20;
-      const is_active_value = is_active === 'true' ? true : is_active === 'false' ? false : undefined;
-
-      const filteration = {
-         search_by_code: search_by_code ? String(search_by_code) : undefined,
-         is_active: is_active_value
-      }
-
-      try {
-         const { total, products } = await this.service.getProductsPaginated(pageNumber, limitNumber, filteration);
-         const total_pages = Math.ceil(total / limitNumber);
-         const has_next_page = pageNumber < total_pages;
-         const has_previous_page = pageNumber > 1;
-
-         return (globalUtils.SuccessfulyResponseJson(res, 200, "Products fetched successfully!", {
-            products, total_products: total, total_pages, has_next_page, has_previous_page
-         }));
-      } catch (err) {
-         return (next(ApiError.create_error(String(err), 500)));
-      }
-   }
-
-   public getBestSellingProducts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-      try {
-         const bestSellingProducts = await this.service.getBestSellers();
-         if (!bestSellingProducts || bestSellingProducts.length === 0) {
-            return globalUtils.SuccessfulyResponseJson(res, 200, "No best selling products found.", []);
-         }
-         return (globalUtils.SuccessfulyResponseJson(res, 200, "Best Selling Products fetched successfully!", bestSellingProducts));
-      } catch (err) {
-         return (next(ApiError.create_error(String(err), 500)));
-      }
-   }
-
    public UpdateProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const { product_id } = req.params;
       console.log("Booooooooooooody", req.body);
@@ -133,29 +96,6 @@ class AdminProductsControllerClass {
       }
    }
 
-   public ProductActivation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-      const { active } = req.body;
-      const { product_id } = req.params;
-
-      try {
-         const product = await this.service.getProductByID(product_id);
-
-         if (!product)
-            return (next(ApiError.create_error("Product not Found!", 404)));
-
-         if (product.is_active === active)
-            return (next(ApiError.create_error(`activation is already ${active}`, 400)));
-         
-         await productService.resetProductCache(product_id);
-
-         const updated_product = await this.service.productActivation(product, active);
-
-         return (globalUtils.SuccessfulyResponseJson(res, 200, `Successfully Updated the activation status!`, { ...updated_product }));
-      } catch (err) {
-         return (next(ApiError.create_error(String(err), 500)));
-      }
-   }
-
    public updateProductImg = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const file = req.file;
       const { product_id } = req.params;
@@ -204,32 +144,6 @@ class AdminProductsControllerClass {
          await productService.resetProductCache(product_id);
          const product_variant = await this.service.newProductVariant(product_id, size, price, quantity);
          return (globalUtils.SuccessfulyResponseJson(res, 201, "Successfully new variant Created!", { ...product_variant }));
-      } catch (err) {
-         return (next(ApiError.create_error(String(err), 500)));
-      }
-   }
-
-   public DeleteProductVariant = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-      const { product_id, variant_id } = req.params;
-      
-      try {
-         const [product, variant] = await Promise.all([
-            this.service.getProductByID(product_id),
-            this.service.getVariantByID(variant_id)
-         ]);
-
-         if (!product)
-            return (next(ApiError.create_error("Product not Found!", 404)));
-
-         if (product.is_active)
-            return (next(ApiError.create_error("You cannot Remove any variatns, you should change the product activation first!", 400)));
-
-         if (!variant)
-            return (next(ApiError.create_error("Product Variant not Found!", 404)));
-         await productService.resetProductCache(product_id);
-
-         await this.service.deleteProductVariant(variant_id);
-         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully removed this Variant!"))
       } catch (err) {
          return (next(ApiError.create_error(String(err), 500)));
       }
@@ -302,6 +216,28 @@ class AdminProductsControllerClass {
       }
    }
 
+   public ProductActivation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { active } = req.body;
+      const { product_id } = req.params;
+
+      try {
+         const product = await this.service.getProductByID(product_id);
+
+         if (!product)
+            return (next(ApiError.create_error("Product not Found!", 404)));
+
+         if (product.is_active === active)
+            return (next(ApiError.create_error(`activation is already ${active}`, 400)));
+         
+         await productService.resetProductCache(product_id);
+
+         const updated_product = await this.service.productActivation(product, active);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, `Successfully Updated the activation status!`, { ...updated_product }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 
    public AddNewProductSpecsValue = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const { product_id, specs_id } = req.params;
@@ -379,6 +315,69 @@ class AdminProductsControllerClass {
          const updated_product = await this.service.updateProductSpecsValue(product.id, specsDefination, value);
 
          return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully Updated the specs value", { ...updated_product }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public DeleteProductVariant = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { product_id, variant_id } = req.params;
+      
+      try {
+         const [product, variant] = await Promise.all([
+            this.service.getProductByID(product_id),
+            this.service.getVariantByID(variant_id)
+         ]);
+
+         if (!product)
+            return (next(ApiError.create_error("Product not Found!", 404)));
+
+         if (product.is_active)
+            return (next(ApiError.create_error("You cannot Remove any variatns, you should change the product activation first!", 400)));
+
+         if (!variant)
+            return (next(ApiError.create_error("Product Variant not Found!", 404)));
+         await productService.resetProductCache(product_id);
+
+         await this.service.deleteProductVariant(variant_id);
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully removed this Variant!"))
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public GetProductsPagination = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { page, limit, search_by_code, is_active } = req.query;
+      const pageNumber = Number(page) || 1;
+      const limitNumber = Number(limit) || 20;
+      const is_active_value = is_active === 'true' ? true : is_active === 'false' ? false : undefined;
+
+      const filteration = {
+         search_by_code: search_by_code ? String(search_by_code) : undefined,
+         is_active: is_active_value
+      }
+
+      try {
+         const { total, products } = await this.service.getProductsPaginated(pageNumber, limitNumber, filteration);
+         const total_pages = Math.ceil(total / limitNumber);
+         const has_next_page = pageNumber < total_pages;
+         const has_previous_page = pageNumber > 1;
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Products fetched successfully!", {
+            products, total_products: total, total_pages, has_next_page, has_previous_page
+         }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public getBestSellingProducts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+         const bestSellingProducts = await this.service.getBestSellers();
+         if (!bestSellingProducts || bestSellingProducts.length === 0) {
+            return globalUtils.SuccessfulyResponseJson(res, 200, "No best selling products found.", []);
+         }
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Best Selling Products fetched successfully!", bestSellingProducts));
       } catch (err) {
          return (next(ApiError.create_error(String(err), 500)));
       }

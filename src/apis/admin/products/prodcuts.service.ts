@@ -16,6 +16,46 @@ class AdminProductServiceClass {
       this.configReplicaDB = ReplicaDB;
    }
 
+   public findProductByTitle = async (title: string) => {
+      try {
+         return (await this.configReplicaDB.product.findFirst({
+            where: { product_title: title },
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   };
+
+   public findProductByCode = async (product_code: string) => {
+      try {
+         return (await this.configReplicaDB.product.findUnique({
+            where: { product_code },
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   };
+
+   public getBrandByIdDB = async (brand_id: string) => {
+      try {
+         return (await this.configReplicaDB.brand.findUnique({
+            where: { id: brand_id },
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   };
+
+   public getCategoryByID = async (category_id: string) => {
+      try {
+         return (await this.configReplicaDB.category.findFirst({
+            where: { id: category_id },
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   };
+
    public addNewProduct = async (
       product_title: string, description: string, product_code: string,
       quantity: number, price_range: string, brand: Brand,
@@ -35,6 +75,270 @@ class AdminProductServiceClass {
          throw (err);
       }
    };
+
+   public deleteProductByID = async (product_id: string) => {
+      try {
+         await this.configMainDB.product.delete({
+            where: { id: product_id }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public findProductByID = async (product_id: string) => {
+      try {
+         return (await this.configReplicaDB.product.findUnique({
+            where: { id: product_id },
+            include: {
+               Product_Categories: true,
+               Product_Variant: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public updateProductDetails = async (product_id: string, dataBody: any) => {
+      const { product_title, description, product_code, color, quantity, price_range, brand_id, category_id } = dataBody;
+
+      // Step 1: Update the main product fields
+      const productUpdateData: any = {
+         product_title,
+         description,
+         product_code,
+         color,
+         quantity,
+         price_range,
+      };
+
+      if (brand_id) {
+         productUpdateData.Brand = {
+            connect: { id: brand_id },
+         };
+      }
+
+      try {
+         // Update product
+         const updatedProduct = await this.configMainDB.product.update({
+            where: { id: product_id },
+            data: productUpdateData,
+         });
+
+         // Step 2: Replace the category
+         if (category_id) {
+            // Delete old category relations
+            await this.configMainDB.product_Categories.deleteMany({
+               where: { product_id }
+            });
+
+            // Create new relation
+            await this.configMainDB.product_Categories.create({
+               data: {
+                  product_id,
+                  category_id,
+               }
+            });
+         }
+
+         return updatedProduct;
+      } catch (err) {
+         throw err;
+      }
+   };
+
+   public updateProductImage = async (product_id: string, img_url: string) => {
+      try {
+         return (await this.configReplicaDB.product.update({
+            where: { id: product_id },
+            data: { url_img: img_url }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public newProductVariant = async (product_id: string, size: string, price: number, quantity: number) => {
+      try {
+         return (await this.configMainDB.product_Variant.create({
+            data: {
+               size, price, quantity, product_id
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public removeProdcutCategory = async (product_id: string, category_id: string) => {
+      try {
+         await this.configMainDB.product_Categories.delete({
+            where: { product_id_category_id: { product_id, category_id } }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public addProdcutCategory = async (product_id: string, category_id: string) => {
+      try {
+         return (await this.configMainDB.product_Categories.create({
+            data: { product_id, category_id }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public productActivation = async (product: Product, active: boolean) => {
+      try {
+         return (await this.configMainDB.product.update({
+            where: { id: product.id },
+            data: { is_active: active }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public getProductByID = async (id: string) => {
+      try {
+         return (await this.configReplicaDB.product.findUnique({
+            where: { id },
+            include: {
+               Product_Specs: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public getSpecsDefByID = async (id: string) => {
+      try {
+         return (await this.configReplicaDB.specs_Defination.findUnique({
+            where: { id }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public createSpecsValie = async (product: Product, specs_Defination: Specs_Defination, value: string) => {
+      try {
+         return (await this.configMainDB.product.update({
+            where: { id: product.id },
+            data: {
+               Product_Specs: {
+                  create: {
+                     specs_id: specs_Defination.id,
+                     value
+                  }
+               }
+            },
+            include: {
+               Product_Specs: {
+                  include: {
+                     Specs_Defination: true
+                  }
+               }
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public deleteProductSpecsVal = async (product_id: string, specs: Specs_Defination) => {
+      try {
+         await this.configMainDB.product_Specs.delete({
+            where: {
+               specs_id_product_id: {
+                  product_id, specs_id: specs.id
+               }
+            }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public updateProductSpecsValue = async (product_id: string, specs: Specs_Defination, value: string) => {
+      try {
+         const transaction = await this.configMainDB.$transaction( async (tx) => {
+            const updated_specs = await tx.product_Specs.update({
+               where: {
+                  specs_id_product_id: {
+                     product_id, specs_id: specs.id
+                  }
+               }, data: { value }
+            });
+
+            const updated_product = await tx.product.findUnique({
+               where: { id: product_id },
+               include: { Product_Specs: true }
+            });
+
+            return (updated_product);
+         });
+
+         return (transaction);
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public getVariantByID = async (variant_id: string) => {
+      try {
+         return (await this.configMainDB.product_Variant.findUnique({
+            where: { id: variant_id },
+            select: {
+               id: true, size: true, price: true, quantity: true, created_at: true, updated_at: true,
+               Product: {
+                  select: { id: true, is_active: true }
+               },
+               _count: {
+                  select: { Product_Order_items: true }
+               }
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public updateProductVariant = async (variant_id: string, size?: string, price?: number, quantity?: number) => {
+      try {
+         const updateData: any = {};
+
+         if (typeof size !== "undefined") updateData.size = size;
+         if (typeof price !== "undefined") updateData.price = price;
+         if (typeof quantity !== "undefined") updateData.quantity = quantity;
+
+         // Prevent updating with empty data
+         if (Object.keys(updateData).length === 0) {
+            throw new Error("No valid fields provided to update.");
+         }
+
+         return (await this.configMainDB.product_Variant.update({
+            where: { id: variant_id },
+            data: updateData
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public deleteProductVariant = async (variant_id: string) => {
+      try {
+         await this.configMainDB.product_Variant.delete({
+            where: { id: variant_id }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
 
    public getProductsPaginated = async (page: number, limit: number, filteration: {
       search_by_code?: string, is_active?: boolean
@@ -104,261 +408,6 @@ class AdminProductServiceClass {
                }
             }
          });
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public findProductByID = async (product_id: string) => {
-      try {
-         return (await this.configReplicaDB.product.findUnique({
-            where: { id: product_id },
-            include: {
-               Product_Categories: true,
-               Product_Variant: true
-            }
-         }));
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-
-   public updateProductDetails = async (product_id: string, dataBody: any) => {
-      const { product_title, description, product_code, color, quantity, price_range, brand_id, category_id } = dataBody;
-
-      // Step 1: Update the main product fields
-      const productUpdateData: any = {
-         product_title,
-         description,
-         product_code,
-         color,
-         quantity,
-         price_range,
-      };
-
-      if (brand_id) {
-         productUpdateData.Brand = {
-            connect: { id: brand_id },
-         };
-      }
-
-      try {
-         // Update product
-         const updatedProduct = await this.configMainDB.product.update({
-            where: { id: product_id },
-            data: productUpdateData,
-         });
-
-         // Step 2: Replace the category
-         if (category_id) {
-            // Delete old category relations
-            await this.configMainDB.product_Categories.deleteMany({
-               where: { product_id }
-            });
-
-            // Create new relation
-            await this.configMainDB.product_Categories.create({
-               data: {
-                  product_id,
-                  category_id,
-               }
-            });
-         }
-
-         return updatedProduct;
-      } catch (err) {
-         throw err;
-      }
-   };
-
-   public deleteProductByID = async (product_id: string) => {
-      try {
-         await this.configMainDB.product.delete({
-            where: { id: product_id }
-         });
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public productActivation = async (product: Product, active: boolean) => {
-      try {
-         return (await this.configMainDB.product.update({
-            where: { id: product.id },
-            data: { is_active: active }
-         }));
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public getProductByID = async (id: string) => {
-      try {
-         return (await this.configReplicaDB.product.findUnique({
-            where: { id },
-            include: {
-               Product_Specs: true
-            }
-         }));
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public newProductVariant = async (product_id: string, size: string, price: number, quantity: number) => {
-      try {
-         return (await this.configMainDB.product_Variant.create({
-            data: {
-               size, price, quantity, product_id
-            }
-         }));
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public getVariantByID = async (variant_id: string) => {
-      try {
-         return (await this.configMainDB.product_Variant.findUnique({
-            where: { id: variant_id },
-            select: {
-               id: true, size: true, price: true, quantity: true, created_at: true, updated_at: true,
-               Product: {
-                  select: { id: true, is_active: true }
-               },
-               _count: {
-                  select: { Product_Order_items: true }
-               }
-            }
-         }));
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public updateProductVariant = async (variant_id: string, size?: string, price?: number, quantity?: number) => {
-      try {
-         const updateData: any = {};
-
-         if (typeof size !== "undefined") updateData.size = size;
-         if (typeof price !== "undefined") updateData.price = price;
-         if (typeof quantity !== "undefined") updateData.quantity = quantity;
-
-         // Prevent updating with empty data
-         if (Object.keys(updateData).length === 0) {
-            throw new Error("No valid fields provided to update.");
-         }
-
-         return (await this.configMainDB.product_Variant.update({
-            where: { id: variant_id },
-            data: updateData
-         }));
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public deleteProductVariant = async (variant_id: string) => {
-      try {
-         await this.configMainDB.product_Variant.delete({
-            where: { id: variant_id }
-         });
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public removeProdcutCategory = async (product_id: string, category_id: string) => {
-      try {
-         await this.configMainDB.product_Categories.delete({
-            where: { product_id_category_id: { product_id, category_id } }
-         });
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public addProdcutCategory = async (product_id: string, category_id: string) => {
-      try {
-         return (await this.configMainDB.product_Categories.create({
-            data: { product_id, category_id }
-         }));
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public getSpecsDefByID = async (id: string) => {
-      try {
-         return (await this.configReplicaDB.specs_Defination.findUnique({
-            where: { id }
-         }));
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-
-   public createSpecsValie = async (product: Product, specs_Defination: Specs_Defination, value: string) => {
-      try {
-         return (await this.configMainDB.product.update({
-            where: { id: product.id },
-            data: {
-               Product_Specs: {
-                  create: {
-                     specs_id: specs_Defination.id,
-                     value
-                  }
-               }
-            },
-            include: {
-               Product_Specs: {
-                  include: {
-                     Specs_Defination: true
-                  }
-               }
-            }
-         }));
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public deleteProductSpecsVal = async (product_id: string, specs: Specs_Defination) => {
-      try {
-         await this.configMainDB.product_Specs.delete({
-            where: {
-               specs_id_product_id: {
-                  product_id, specs_id: specs.id
-               }
-            }
-         });
-      } catch (err) {
-         throw (err);
-      }
-   }
-
-   public updateProductSpecsValue = async (product_id: string, specs: Specs_Defination, value: string) => {
-      try {
-         const transaction = await this.configMainDB.$transaction( async (tx) => {
-            const updated_specs = await tx.product_Specs.update({
-               where: {
-                  specs_id_product_id: {
-                     product_id, specs_id: specs.id
-                  }
-               }, data: { value }
-            });
-
-            const updated_product = await tx.product.findUnique({
-               where: { id: product_id },
-               include: { Product_Specs: true }
-            });
-
-            return (updated_product);
-         });
-
-         return (transaction);
       } catch (err) {
          throw (err);
       }

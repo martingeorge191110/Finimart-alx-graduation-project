@@ -33,7 +33,6 @@ AdminProductRoutes.route("/bestsellers/")
       adminProductController.getBestSellingProducts
    )
 
-   
 AdminProductRoutes.route("/:product_id/")
    .get(
       productValidator.productParamValidID(), ApiError.validation_error,
@@ -69,7 +68,6 @@ AdminProductRoutes.route("/:product_id/variants/")
       ApiError.validation_error,
       adminProductController.addProductVaraint
    )
-
 
 AdminProductRoutes.route("/:product_id/variants/:variant_id/")
    .delete(

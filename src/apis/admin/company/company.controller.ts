@@ -40,6 +40,21 @@ class AdminCompanyControllerClass {
       }
    };
 
+   public BlockCompanyAccount = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const company: Company = (req as any).company;
+      const { block } = req.body;
+
+      try {
+         const updated_company = await this.service.updateCompanyData(company.id, { blocked: Boolean(block) });
+
+         await this.service.updateCompanyInRedis(updated_company);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfuly Verified the Company", { ...updated_company }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
    public CompaniesList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const { page, limit, verified, city, country, min_amount_purcahsed, max_amount_purcahsed, sort_by } = req.query;
 
@@ -69,21 +84,6 @@ class AdminCompanyControllerClass {
          return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfuly Retreived the Companies List", {
             companies, total_companies, total_pages, has_next_page, has_previous_page
          }))
-      } catch (err) {
-         return (next(ApiError.create_error(String(err), 500)));
-      }
-   }
-
-   public BlockCompanyAccount = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-      const company: Company = (req as any).company;
-      const { block } = req.body;
-
-      try {
-         const updated_company = await this.service.updateCompanyData(company.id, { blocked: Boolean(block) });
-
-         await this.service.updateCompanyInRedis(updated_company);
-
-         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfuly Verified the Company", { ...updated_company }));
       } catch (err) {
          return (next(ApiError.create_error(String(err), 500)));
       }
@@ -130,7 +130,6 @@ class AdminCompanyControllerClass {
          next(ApiError.create_error(String(err), 500));
       }
    };
-
 }
 
 const adminCompanyController = new AdminCompanyControllerClass();

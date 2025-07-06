@@ -79,6 +79,7 @@ class AdminUsersValidatorClass {
          .isString().withMessage("user_role must be a string.")
          .isIn(["Controller", "Sub_Controller", "Order_Maker"]).withMessage("Invalid user_role provided.")
    ])
+
 }
 
 const AdminUsersValidator = new AdminUsersValidatorClass();

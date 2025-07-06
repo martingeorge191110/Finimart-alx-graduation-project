@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Router } from "express";
-import { verifyAdminToken } from "../../../middlewares/verify.admin.token";
+import { verifyAdminToken } from "../../../middlewares/admin.middlewares";
 import AdminUsersValidator from "./users.validator";
 import ApiError from "../../../middlewares/error.handler";
 import AdminUsersController from "./users.controller";
@@ -16,7 +16,6 @@ AdminUsersRouter.route("/")
       AdminUsersValidator.getUsersPaginationValid(), ApiError.validation_error,
       AdminUsersController.GetUsersPagination
    )
-
 
 AdminUsersRouter.route('/:user_id/')
    .delete(

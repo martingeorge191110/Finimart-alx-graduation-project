@@ -54,7 +54,6 @@ class AdminOrdersControllerClass {
       }
    }
 
-
    public UpdateOrderStatusAndPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const { order_id } = req.params;
       const { status, payment_status } = req.body;

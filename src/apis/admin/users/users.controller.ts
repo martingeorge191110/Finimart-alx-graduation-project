@@ -1,8 +1,12 @@
 #!/usr/bin/env node
+
 import { NextFunction, Request, Response } from "express";
 import AdminUsersService from "./users.service";
 import ApiError from "../../../middlewares/error.handler";
-import globalUtils from "../../../utilies/globals";
+import globalUtils from "../../../utils/globals";
+import adminUtilies from "../admin.utilies";
+import { User } from "../../../../generated/prisma";
+import { promises } from "nodemailer/lib/xoauth2";
 
 
 
@@ -64,19 +68,6 @@ class AdminUsersControllerClass {
       }
    }
 
-   public UpdateUserInfoByID = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-      const { user_id } = req.params;
-      const { first_name, last_name, email, phone_number, is_super_user, user_role } = req.body;
-
-      try {
-         await this.service.updateUserInfo(user_id, first_name, last_name, email, phone_number, is_super_user, user_role);
-
-         return (globalUtils.SuccessfulyResponseJson(res, 200, "User Updated successfully!"))
-      } catch (err) {
-         return (next(ApiError.create_error(String(err), 500)));
-      }
-   }
-
    public blockUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const { user_id } = req.params;
       const { block } = req.body;
@@ -86,6 +77,19 @@ class AdminUsersControllerClass {
 
          return (globalUtils.SuccessfulyResponseJson(res, 200, "User blocked successfully!"))
 
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+   public UpdateUserInfoByID = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { user_id } = req.params;
+      const { first_name, last_name, email, phone_number, is_super_user, user_role } = req.body;
+
+      try {
+         await this.service.updateUserInfo(user_id, first_name, last_name, email, phone_number, is_super_user, user_role);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "User Updated successfully!"))
       } catch (err) {
          return (next(ApiError.create_error(String(err), 500)));
       }
