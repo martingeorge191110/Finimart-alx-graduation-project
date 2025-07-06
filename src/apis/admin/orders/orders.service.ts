@@ -75,6 +75,47 @@ class AdminOrdersServiceClass {
          throw (err);
       }
    }
+
+   public getOrderDetailsByID = async (order_id: string) => {
+      try {
+         return (await this.configReplicaDB.orders.findUnique({
+            where: { id: order_id },
+            include: { 
+               Company: {
+                  select: { id: true, name: true,
+                     phone_number: true,
+                     Super_User: {
+                        select: {
+                           id: true, first_name: true, last_name: true
+                        }
+                     }
+                  }
+               },
+               Address: true,
+               Created_By: {
+                  select: { id: true, first_name: true, last_name: true, user_role: true, phone_number: true, email: true }
+               },
+               Order_Items: {
+                  include: {
+                     Product: true,
+                     Product_Variant: true
+                  }
+               },
+               Invoice: true
+            }
+         }))
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+   public getOrderByID = async (order_id: string) => {
+      try {
+         return (await this.configReplicaDB.orders.findUnique({ where: { id: order_id } }))
+      } catch (err) {
+         throw (err);
+      }
+   }
 }
 
 const adminOrderService = AdminOrdersServiceClass.createInstance();

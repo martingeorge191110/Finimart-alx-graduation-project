@@ -39,6 +39,22 @@ class AdminOrdersControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+   public GetSpecificOrderDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { order_id } = req.params;
+
+      try {
+         const orderDetails = await this.service.getOrderDetailsByID(order_id);
+         if (!orderDetails)
+            return (next(ApiError.create_error("Order not found", 404)));
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfuly Retreived Order Details", { ...orderDetails }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
+
+
 }
 
 const adminOrderController = AdminOrdersControllerClass.createInstance();

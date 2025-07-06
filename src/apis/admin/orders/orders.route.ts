@@ -16,4 +16,10 @@ AdminOrderRoutes.route("/")
       adminOrderController.GetOrderPagination
    )
 
+AdminOrderRoutes.route("/:order_id/")
+   .get(
+      adminOrderValidator.orderIDValid(), ApiError.validation_error,
+      adminOrderController.GetSpecificOrderDetails
+   )
+
 export default AdminOrderRoutes;
