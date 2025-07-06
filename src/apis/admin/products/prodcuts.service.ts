@@ -108,6 +108,80 @@ class AdminProductServiceClass {
          throw (err);
       }
    }
+
+   public findProductByID = async (product_id: string) => {
+      try {
+         return (await this.configReplicaDB.product.findUnique({
+            where: { id: product_id },
+            include: {
+               Product_Categories: true,
+               Product_Variant: true
+            }
+         }));
+      } catch (err) {
+         throw (err);
+      }
+   }
+
+
+   public updateProductDetails = async (product_id: string, dataBody: any) => {
+      const { product_title, description, product_code, color, quantity, price_range, brand_id, category_id } = dataBody;
+
+      // Step 1: Update the main product fields
+      const productUpdateData: any = {
+         product_title,
+         description,
+         product_code,
+         color,
+         quantity,
+         price_range,
+      };
+
+      if (brand_id) {
+         productUpdateData.Brand = {
+            connect: { id: brand_id },
+         };
+      }
+
+      try {
+         // Update product
+         const updatedProduct = await this.configMainDB.product.update({
+            where: { id: product_id },
+            data: productUpdateData,
+         });
+
+         // Step 2: Replace the category
+         if (category_id) {
+            // Delete old category relations
+            await this.configMainDB.product_Categories.deleteMany({
+               where: { product_id }
+            });
+
+            // Create new relation
+            await this.configMainDB.product_Categories.create({
+               data: {
+                  product_id,
+                  category_id,
+               }
+            });
+         }
+
+         return updatedProduct;
+      } catch (err) {
+         throw err;
+      }
+   };
+
+   public deleteProductByID = async (product_id: string) => {
+      try {
+         await this.configMainDB.product.delete({
+            where: { id: product_id }
+         });
+      } catch (err) {
+         throw (err);
+      }
+   }
+
 }
 
 const adminProductService = new AdminProductServiceClass();

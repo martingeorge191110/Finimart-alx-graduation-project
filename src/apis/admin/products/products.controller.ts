@@ -73,6 +73,65 @@ class AdminProductsControllerClass {
          return (next(ApiError.create_error(String(err), 500)));
       }
    }
+
+   public UpdateProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { product_id } = req.params;
+      console.log("Booooooooooooody", req.body);
+      const { product_title, description, product_code, color, quantity, price_range, brand_id, category_id } = req.body;
+      const numberQuantity = Number(quantity);
+      await productService.resetProductCache(product_id);
+
+      const dataBody = {
+         product_title,
+         description,
+         product_code,
+         color,
+         quantity: numberQuantity,
+         price_range,
+         brand_id,
+         category_id,
+      };
+
+      try {
+         const find_product = await this.service.findProductByID(product_id);
+
+         if (!find_product)
+            return (next(ApiError.create_error("In Valid Product!", 404)));
+
+         for (const ele of find_product.Product_Categories)
+            if (ele.category_id === category_id)
+               return (next(ApiError.create_error("This Product has relation with the category!", 400)));
+         await productService.resetProductCache(product_id);
+
+         const updatedProduct = await this.service.updateProductDetails(product_id, dataBody);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Product Updated Successfully", { ...updatedProduct }));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)))
+      }
+      
+   }
+
+   public DeleteProduct = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const { product_id } = req.params;
+
+      try {
+         const find_product = await this.service.findProductByID(product_id);
+
+         if (!find_product)
+            return (next(ApiError.create_error("Invalid Product!", 404)));
+
+         if (find_product.is_active)
+            return (next(ApiError.create_error("You cannot delete an active product!", 400)));
+
+         await this.service.deleteProductByID(product_id);
+         await productService.resetProductCache(product_id);
+
+         return (globalUtils.SuccessfulyResponseJson(res, 200, "Successfully Deleted the product!"));
+      } catch (err) {
+         return (next(ApiError.create_error(String(err), 500)));
+      }
+   }
 }
 
 const adminProductController = new AdminProductsControllerClass();

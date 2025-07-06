@@ -33,6 +33,21 @@ AdminProductRoutes.route("/bestsellers/")
       adminProductController.getBestSellingProducts
    )
 
-
    
+AdminProductRoutes.route("/:product_id/")
+   .get(
+      productValidator.productParamValidID(), ApiError.validation_error,
+      productController.getProduct
+   )
+   .put(
+      productValidator.productParamValidID(), adminProductValidator.updatePorductValid(),
+      ApiError.validation_error,
+      adminProductController.UpdateProduct
+   )
+   .delete(
+      productValidator.productParamValidID(), ApiError.validation_error,
+      adminProductController.DeleteProduct
+   )
+
+
 export default AdminProductRoutes;
