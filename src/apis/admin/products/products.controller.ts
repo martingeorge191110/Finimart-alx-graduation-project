@@ -3,9 +3,8 @@ import { NextFunction, Request, Response } from "express";
 import ApiError from "../../../middlewares/error.handler";
 import adminProductService from "./prodcuts.service";
 import { Brand, Category } from "../../../../generated/prisma";
-import globalUtils from "../../../utils/globals";
+import globalUtils from "../../../utilies/globals";
 import { deleteCloudinaryImage, uploadImageToCloudinary } from "../../../middlewares/cloudinary";
-import { isAdminAccount } from "../../../middlewares/admin.middlewares";
 import productService from "../../products/products.services";
 
 

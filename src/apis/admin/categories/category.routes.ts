@@ -13,78 +13,55 @@ CategoryRoutes.use(verifyAdminToken, isAdminAccount);
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     CreateCategoryRequest:
- *       type: object
- *       required:
- *         - category_name
- *       properties:
- *         category_name:
- *           type: string
- *           minLength: 3
- *           maxLength: 70
- *           example: "Electronics"
- *         parent_ids:
- *           type: array
- *           maxItems: 2
- *           items:
- *             type: string
- *           example: ["parent-id-1", "parent-id-2"]
- *     CategoryResponse:
- *       type: object
- *       properties:
- *         status:
- *           type: string
- *           example: "success"
- *         message:
- *           type: string
- *           example: "New Category has been added!"
- *         data:
- *           type: object
- *           properties:
- *             id:
- *               type: string
- *               description: Unique identifier of the category
- *             category_name:
- *               type: string
- *               description: Name of the category
- *             created_at:
- *               type: string
- *               format: date-time
- *               description: Timestamp when the category was created
- *             updated_at:
- *               type: string
- *               format: date-time
- *               description: Timestamp when the category was last updated
- *
- * @swagger
- * /api/categories/create:
+ * /api/v1/admin/categories/:
  *   post:
- *     tags:
- *       - Categories
  *     summary: Create a new category
- *     security:
- *       - BearerAuth: []
+ *     tags: [Admin Categories]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateCategoryRequest'
+ *             type: object
+ *             required: [category_name, website_name, level]
+ *             properties:
+ *               category_name:
+ *                 type: string
+ *               website_name:
+ *                 type: string
+ *               level:
+ *                 type: integer
+ *               imge_url:
+ *                 type: string
+ *               parent_id:
+ *                 type: string
  *     responses:
  *       201:
- *         description: Category created successfully
+ *         description: Category created
  *       400:
  *         description: Validation error
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Manager access required
- *       409:
- *         description: Category name exists
- *       500:
- *         description: Server error
+ *   get:
+ *     summary: Get paginated/filterable list of categories
+ *     tags: [Admin Categories]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         required: false
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         required: false
+ *       - in: query
+ *         name: level
+ *         schema:
+ *           type: integer
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: List of categories
  */
 CategoryRoutes.route("/")
    .post(
@@ -92,79 +69,41 @@ CategoryRoutes.route("/")
       categoryController.CreateCategory
    )
    .get(
-      // need to add the caching process
       adminCategoryValidation.categoryListPaginationValid(), ApiError.validation_error,
       adminCategoryController.CategoryListFilteration
    )
 
 /**
  * @swagger
- * /api/categories/hierarchy:
- *   get:
- *     tags:
- *       - Categories
- *     summary: Get complete category hierarchy
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: Successfully retrieved category hierarchy
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: number
- *                   example: 200
- *                 message:
- *                   type: string
- *                   example: "successfully Categories Hierarchy Retrieved!"
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/CategoryWithChildren'
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Manager access required
- *       500:
- *         description: Server error
+ * /api/v1/admin/categories/hierarchy/:
  *   post:
- *     tags:
- *       - Categories
  *     summary: Create category hierarchy relations
- *     security:
- *       - BearerAuth: []
+ *     tags: [Admin Categories]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - parent_id
- *               - children_ids
+ *             required: [parent_id, children_ids]
  *             properties:
  *               parent_id:
  *                 type: string
- *                 example: "cat_123"
  *               children_ids:
  *                 type: array
  *                 items:
  *                   type: string
- *                 example: ["cat_456", "cat_789"]
  *     responses:
  *       201:
- *         description: Hierarchy relations created successfully
+ *         description: Hierarchy created
  *       400:
  *         description: Validation error
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Manager access required
- *       500:
- *         description: Server error
+ *   get:
+ *     summary: Get complete category hierarchy
+ *     tags: [Admin Categories]
+ *     responses:
+ *       200:
+ *         description: Category hierarchy
  */
 CategoryRoutes.route("/hierarchy/")
    .post(
@@ -175,6 +114,52 @@ CategoryRoutes.route("/hierarchy/")
       categoryController.getHierarchy
    );
 
+/**
+ * @swagger
+ * /api/v1/admin/categories/{category_id}/:
+ *   put:
+ *     summary: Update category name or image
+ *     tags: [Admin Categories]
+ *     parameters:
+ *       - in: path
+ *         name: category_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [category_name, website_name]
+ *             properties:
+ *               category_name:
+ *                 type: string
+ *               website_name:
+ *                 type: string
+ *               imge_url:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Category updated
+ *       400:
+ *         description: Validation error
+ *   delete:
+ *     summary: Delete a category
+ *     tags: [Admin Categories]
+ *     parameters:
+ *       - in: path
+ *         name: category_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Category deleted
+ *       400:
+ *         description: Validation error
+ */
 CategoryRoutes.route("/:category_id/")
    .put(
       adminCategoryValidation.updateCategoryValid(), ApiError.validation_error,

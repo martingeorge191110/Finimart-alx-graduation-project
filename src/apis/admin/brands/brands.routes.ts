@@ -13,7 +13,7 @@ BrandsRoutes.use(verifyAdminToken, isAdminAccount);
  * @swagger
  * /api/v1/admin/brands/:
  *   post:
- *     summary: Add new brand
+ *     summary: Add a new brand
  *     tags: [Admin Brands]
  *     requestBody:
  *       required: true
@@ -24,103 +24,30 @@ BrandsRoutes.use(verifyAdminToken, isAdminAccount);
  *             properties:
  *               name:
  *                 type: string
- *                 description: Brand name (unique name)
  *               brand_img_url:
  *                 type: string
- *                 description: URL of the brand image and must be a valid image URL
  *             required:
  *               - name
  *               - brand_img_url
  *     responses:
  *       201:
- *         description: New Brand created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   description: Indicates if the operation was successful
- *                 message:
- *                   type: string
- *                   description: Success message
- *                 data:
- *                   type: object
- *                   description: The newly created brand object
- *                   properties:
- *                     id:
- *                       type: string
- *                       description: Unique identifier for the brand
- *                     name:
- *                       type: string
- *                       description: Name of the brand
- *                     brand_img_url:
- *                       type: string
- *                       description: URL of the brand image
+ *         description: Brand created
  *       400:
- *         description: Bad request, validation error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *         description: Validation error
  *       401:
- *         description: Unauthorized, invalid or missing token
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *         description: Unauthorized
+ */
+/**
+ * @swagger
+ * /api/v1/admin/brands/:
  *   get:
  *     summary: Get all brands
  *     tags: [Admin Brands]
  *     responses:
  *       200:
- *         description: Successfully retrieved the list of brands
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   description: Indicates if the operation was successful
- *                 message:
- *                   type: string
- *                   description: Success message
- *                 data:
- *                   type: array
- *                   description: Array of brand objects
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                         description: Unique identifier for the brand
- *                       name:
- *                         type: string
- *                         description: Name of the brand
- *                       brand_img_url:
- *                         type: string
- *                         description: URL of the brand image
+ *         description: List of brands
  *       401:
- *         description: Unauthorized, invalid or missing token
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *
+ *         description: Unauthorized
  */
 BrandsRoutes.route("/")
    .post(
@@ -130,6 +57,57 @@ BrandsRoutes.route("/")
    )
    .get(adminBrandsController.getBrands);
 
+/**
+ * @swagger
+ * /api/v1/admin/brands/{brand_id}/:
+ *   put:
+ *     summary: Update a brand
+ *     tags: [Admin Brands]
+ *     parameters:
+ *       - in: path
+ *         name: brand_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               brand_img_url:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Brand updated
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Brand not found
+ *   delete:
+ *     summary: Delete a brand
+ *     tags: [Admin Brands]
+ *     parameters:
+ *       - in: path
+ *         name: brand_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Brand deleted
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Brand not found
+ */
 BrandsRoutes.route("/:brand_id/")
    .put(
       adminBrandsValidation.updateBrandValidation(),

@@ -6,8 +6,18 @@ import adminDashboardController from "./dashboard.controller";
 
 const DashboardRoutes: Router = Router();
 
-DashboardRoutes.use( verifyAdminToken, isAdminAccount );
+DashboardRoutes.use(verifyAdminToken, isAdminAccount);
 
+/**
+ * @swagger
+ * /api/v1/admin/dashboard/stats/:
+ *   get:
+ *     summary: Get admin dashboard statistics
+ *     tags: [Admin Dashboard]
+ *     responses:
+ *       200:
+ *         description: Dashboard statistics
+ */
 DashboardRoutes.route("/stats/")
    .get(
       adminDashboardController.DashboardStats
