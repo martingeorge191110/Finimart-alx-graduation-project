@@ -1,0 +1,118 @@
+GET http://localhost:5000/api/v1/admin/auth/is-authenticated
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc0OTY5OTU3NSwiZXhwIjoxNzQ5NzAzMTc1fQ.X1sVQOn7NK6OiXP0iQM-G9ZBrFDKlmHmXWoWzL2PQcI
+###
+POST http://localhost:5000/api/v1/admin/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "your_password_here"
+}
+###
+POST http://localhost:5000/api/v1/admin/auth/refresh-token/
+
+###
+GET http://localhost:5000/api/v1/admin/companies?page=1&limit=20&verified=true&min_amount_purchased=5000&max_amount_purchased=10000
+###
+GET http://localhost:5000/api/v1/admin/dashboard/stats/
+###
+PUT http://localhost:5000/api/v1/admin/companies/b45bbd22-5b62-4636-a038-59ab249fcffe/verify/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc0OTkyOTg4MCwiZXhwIjoxNzQ5OTMzNDgwfQ.srnRu1Wi6KB4L4clGVaVM7ATCwoW_67Vc5RWPAedMyI
+###
+PUT http://localhost:5000/api/v1/admin/companies/b45bbd22-5b62-4636-a038-59ab249fcffe/block/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDQ1NTkyMSwiZXhwIjoxNzUwNDU5NTIxfQ.-xNc4__XURwG74_-p4IH9BFWgGA5pq3FoK1AjRYD7Rw
+Content-Type: application/json
+
+{
+  "block": true
+}
+###
+
+###
+PUT http://localhost:5000/api/v1/admin/companies/b45bbd22-5b62-4636-a038-59ab249fcffe/
+###
+GET http://localhost:5000/api/v1/admin/users/
+###
+DELETE http://localhost:5000/api/v1/admin/users/ed1100c3-b9be-4144-88d4-92faaab59ed2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDQ1NTkyMSwiZXhwIjoxNzUwNDU5NTIxfQ.-xNc4__XURwG74_-p4IH9BFWgGA5pq3FoK1AjRYD7Rw
+#####
+GET http://localhost:5000/api/v1/admin/category/?level=0
+Authorization: Bearer eeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDUwNDY5MywiZXhwIjoxNzUwNTA4MjkzfQ.rZ_taKr0sPvWBNZTKpvvqkhGq_lvtseqX2XA8tpLVQ4
+###
+GET http://localhost:5000/api/v1/admin/categories/page/?page=1&limit=20
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDE2NjIxOCwiZXhwIjoxNzUwMTY5ODE4fQ.4qy46Zq5cFd53ekjRvDcLv1MOwzFyXtA2fOJhCjMaaA
+###
+GET http://localhost:5000/api/v1/admin/specs-definition/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDUwMzc0MCwiZXhwIjoxNzUwNTA3MzQwfQ.R_GjR5RjD-UO2UOzEQuDOw-J2akp09IVBb9r4pgC1P8
+###
+GET http://localhost:5000/api/v1/admin/products/?page=1&limit=20&is_active=false
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDI1MjQ4MiwiZXhwIjoxNzUwMjU2MDgyfQ.tJMZZ5DOEU1EYXKnE-eUuF_qYBayPdlm--qPTV2paeY
+###
+GET http://localhost:5000/api/v1/admin/products/066e60b7-6009-4d47-b6c9-159cbe108a76/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDE5MzEyMiwiZXhwIjoxNzUwMTk2NzIyfQ.xKuvUoRpD1hEOrdsZrm6BTnnBsTYKz0_33hnDeNP1TU
+###
+POST http://localhost:5000/api/v1/admin/products/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDIxNjg2OCwiZXhwIjoxNzUwMjIwNDY4fQ.QhHBTNsa5EqKmKajiVaJthNqs9a60eIg31oSri4KY8g
+Content-Type: multipart/form-data; boundary=BOUNDARY
+
+--BOUNDARY
+Content-Disposition: form-data; name="product_title"
+
+Demo Product 99
+--BOUNDARY
+Content-Disposition: form-data; name="description"
+
+Auto seeded product 99
+--BOUNDARY
+Content-Disposition: form-data; name="product_code"
+
+DEMO-099
+--BOUNDARY
+Content-Disposition: form-data; name="color"
+
+Blue
+--BOUNDARY
+Content-Disposition: form-data; name="quantity"
+
+25
+--BOUNDARY
+Content-Disposition: form-data; name="price_range"
+
+Medium
+--BOUNDARY
+Content-Disposition: form-data; name="brand_id"
+
+687fd5fe-9d8d-49dc-bdb7-d014c225b073
+--BOUNDARY
+Content-Disposition: form-data; name="category_id"
+
+bc0fdc5c-ebb8-4994-b431-1af760cb0344
+--BOUNDARY
+Content-Disposition: form-data; name="img"; filename="hello.JPG"
+Content-Type: image/jpeg
+
+< C:\Users\Lenovo\Desktop\hello.JPG
+--BOUNDARY--
+###
+GET http://localhost:5000/api/v1/admin/specs-definition/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDI3ODg1MiwiZXhwIjoxNzUwMjgyNDUyfQ._zUg7nGH2X_yPr9nYSnNdBAQsQaqEp5VoqItuvzdnOs
+###
+GET http://localhost:5000/api/v1/admin/orders/?page=1&limit=20
+###
+GET http://localhost:5000/api/v1/admin/invoices/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDI3ODg1MiwiZXhwIjoxNzUwMjgyNDUyfQ._zUg7nGH2X_yPr9nYSnNdBAQsQaqEp5VoqItuvzdnOs
+###
+POST http://localhost:5000/api/v1/admin/auth/login/
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "your_password_here"
+}
+###
+GET http://localhost:5000/api/v1/admin/orders/
+###
+GET http://localhost:5000/api/v1/admin/orders/d271b1e8-26d8-40b2-a748-e74edde1df63/
+###
+GET http://localhost:5000/api/v1/admin/invoices/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6ImIyY2QzYzFiLWYyMTQtNDNhNC05ZmNlLTU5MzE0MTIyMjM5MSIsImlzX21hbmFnZXIiOnRydWUsImlhdCI6MTc1MDQ0OTI5MSwiZXhwIjoxNzUwNDUyODkxfQ.CtvEY3-Ov7i3fIRUx-2jrBYpLh8D0OURVJbPX6gTNMs

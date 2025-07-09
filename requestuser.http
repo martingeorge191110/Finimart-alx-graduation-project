@@ -1,0 +1,16 @@
+POST http://localhost:5000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "mahmoud@gmail.com",
+  "password": "your_password_here",
+    "accept_cookies": true
+}
+###
+GET http://localhost:5000/api/v1/products/best-selling/
+###
+GET http://localhost:5000/api/v1/categories/roots/
+###
+POST http://localhost:5000/api/v1/auth/refresh-token/
+###
+GET http://localhost:5000/api/v1/auth/is-authinticated/
